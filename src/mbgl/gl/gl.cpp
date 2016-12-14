@@ -6,7 +6,7 @@ namespace gl {
 
 namespace {
 
-constexpr const char* stringFromError(GLenum err) {
+const char* stringFromError(GLenum err) {
     switch (err) {
     case GL_INVALID_ENUM:
         return "GL_INVALID_ENUM";

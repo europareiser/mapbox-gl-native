@@ -15,15 +15,15 @@ enum class Update {
     Layout                    = 1 << 8
 };
 
-constexpr Update operator|(Update lhs, Update rhs) {
+inline Update operator|(Update lhs, Update rhs) {
     return Update(mbgl::underlying_type(lhs) | mbgl::underlying_type(rhs));
 }
 
-constexpr Update& operator|=(Update& lhs, const Update& rhs) {
+inline Update& operator|=(Update& lhs, const Update& rhs) {
     return (lhs = lhs | rhs);
 }
 
-constexpr bool operator& (Update lhs, Update rhs) {
+inline bool operator& (Update lhs, Update rhs) {
     return mbgl::underlying_type(lhs) & mbgl::underlying_type(rhs);
 }
 

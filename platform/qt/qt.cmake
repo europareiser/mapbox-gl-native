@@ -40,6 +40,7 @@ set(MBGL_QT_FILES
     PRIVATE ${CMAKE_SOURCE_DIR}/platform/qt/src/string_stdlib.cpp
     PRIVATE ${CMAKE_SOURCE_DIR}/platform/qt/src/timer.cpp
     PRIVATE ${CMAKE_SOURCE_DIR}/platform/qt/src/timer_impl.hpp
+    PRIVATE ${CMAKE_SOURCE_DIR}/platform/qt/src/utf.cpp
 )
 
 if(WITH_QT_OFFLINE)
