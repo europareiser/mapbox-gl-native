@@ -63,6 +63,13 @@ public:
                              const OfflineRegionMetadata& metadata,
                              std::function<void (std::exception_ptr,
                                                  optional<OfflineRegion>)>);
+    
+    
+    void processPackForRegion(const OfflineRegionDefinition& definition,
+                              const OfflineRegionMetadata& metadata,
+                              const std::string& path,
+                              std::function<void (std::exception_ptr)>);
+
 
     /*
      * Update an offline region metadata in the database.

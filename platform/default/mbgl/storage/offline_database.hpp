@@ -2,6 +2,7 @@
 
 #include <mbgl/storage/resource.hpp>
 #include <mbgl/storage/offline.hpp>
+#include <mbgl/storage/bundle_tiles_provider.hpp>
 #include <mbgl/util/noncopyable.hpp>
 #include <mbgl/util/optional.hpp>
 #include <mbgl/util/constants.hpp>
@@ -34,6 +35,10 @@ public:
 
     // Return value is (inserted, stored size)
     std::pair<bool, uint64_t> put(const Resource&, const Response&);
+    
+    bool putTilesForRegion(BundleTilesProvider&, 
+                           const OfflineRegionDefinition&,
+                           const OfflineRegionMetadata&);
 
     std::vector<OfflineRegion> listRegions();
 

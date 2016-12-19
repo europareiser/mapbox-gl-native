@@ -190,6 +190,33 @@ NSString * const MGLOfflinePackMaximumCountUserInfoKey = MGLOfflinePackUserInfoK
 }
 
 #pragma mark Pack management methods
+- (void)processPackForRegion:(id <MGLOfflineRegion>)aRegion withContext:(NSData *)aContext regionFilePath:(nullable NSString *)aPath completionHandler:(nullable MGLOfflinePackProcessionCompletionHandler)aCompletion
+{
+    if (![aRegion conformsToProtocol:@protocol(MGLOfflineRegion_Private)]) {
+        [NSException raise:@"Unsupported region type" format:
+         @"Regions of type %@ are unsupported.", NSStringFromClass([aRegion class])];
+        return;
+    }
+    
+    const mbgl::OfflineTilePyramidRegionDefinition regionDefinition = [(id <MGLOfflineRegion_Private>)aRegion offlineRegionDefinition];
+    mbgl::OfflineRegionMetadata metadata(aContext.length);
+    [aContext getBytes:&metadata[0] length:metadata.size()];
+    
+    self.mbglFileSource->processPackForRegion(regionDefinition, metadata, aPath.UTF8String, [&, aCompletion](std::exception_ptr exception) {
+        NSError *error = nil;
+        if (exception) {
+            NSString *errorDescription = @(mbgl::util::toString(exception).c_str());
+            error = [NSError errorWithDomain:MGLErrorDomain code:-1 userInfo:errorDescription ? @{
+              NSLocalizedDescriptionKey: errorDescription,
+            } : nil];
+        }
+        if (aCompletion) {
+            dispatch_async(dispatch_get_main_queue(), [&, aCompletion, error](void) {
+                aCompletion(error);
+            });
+        }
+    });
+}
 
 - (void)addPackForRegion:(id <MGLOfflineRegion>)region withContext:(NSData *)context completionHandler:(MGLOfflinePackAdditionCompletionHandler)completion {
     __weak MGLOfflineStorage *weakSelf = self;

@@ -554,6 +554,48 @@ std::vector<OfflineRegion> OfflineDatabase::listRegions() {
 
     return result;
 }
+    
+bool OfflineDatabase::putTilesForRegion(BundleTilesProvider& tilesProvider,
+                                        const OfflineRegionDefinition& definition,
+                                        const OfflineRegionMetadata& metadata) {
+    bool result = false;
+    mapbox::sqlite::Transaction transaction(*db, mapbox::sqlite::Transaction::Immediate);
+    
+    try {
+        createRegion(definition, metadata);
+        Resource *resource = nullptr;
+        Response *response = nullptr;
+        while (tilesProvider.nextResource(*resource, *response)) {
+            Statement insert = getStatement(
+                "INSERT INTO tiles (url_template, pixel_ratio, x,  y,  z,  modified,  expires,  accessed,  data, compressed) "
+                "VALUES            (?1,           ?2,          ?3, ?4, ?5, ?6,        ?7,       ?8,        ?9,  ?10) ");
+            insert->bind(1, resource->tileData->urlTemplate);
+            insert->bind(2, resource->tileData->pixelRatio);
+            insert->bind(3, resource->tileData->x);
+            insert->bind(4, resource->tileData->y);
+            insert->bind(5, resource->tileData->z);
+            insert->bind(6, util::now());
+            insert->bind(7, response->expires);
+            insert->bind(8, util::now());
+            
+            if (response->noContent) {
+                insert->bind(9, nullptr);
+                insert->bind(10, false);
+            } else {
+                std::shared_ptr<const std::string> data = response->data;
+                insert->bindBlob(9, data->data(), data->size(), false);
+                insert->bind(10, true);
+            }
+            
+            insert->run();
+        }
+        transaction.commit();
+        result = true;
+    } catch (...) {
+        transaction.rollback();
+    }
+    return result;
+}
 
 OfflineRegion OfflineDatabase::createRegion(const OfflineRegionDefinition& definition,
                                             const OfflineRegionMetadata& metadata) {

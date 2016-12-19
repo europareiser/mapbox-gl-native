@@ -116,6 +116,8 @@ extern NSString * const MGLOfflinePackMaximumCountUserInfoKey __attribute__((dep
  */
 typedef void (^MGLOfflinePackAdditionCompletionHandler)(MGLOfflinePack * _Nullable pack, NSError * _Nullable error);
 
+typedef void (^MGLOfflinePackProcessionCompletionHandler)(NSError * _Nullable error);
+
 /**
  A block to be called once an offline pack has been completely invalidated and
  removed.
@@ -179,6 +181,8 @@ typedef void (^MGLOfflinePackRemovalCompletionHandler)(NSError * _Nullable error
     This handler is executed asynchronously on the main queue.
  */
 - (void)addPackForRegion:(id <MGLOfflineRegion>)region withContext:(NSData *)context completionHandler:(nullable MGLOfflinePackAdditionCompletionHandler)completion;
+
+- (void)processPackForRegion:(id <MGLOfflineRegion>)region withContext:(NSData *)context regionFilePath:(nullable NSString *)aPath completionHandler:(nullable MGLOfflinePackProcessionCompletionHandler)completion;
 
 /**
  Unregisters the given offline pack and frees any resources that are no longer

@@ -4,6 +4,7 @@
 #include <mbgl/storage/online_file_source.hpp>
 #include <mbgl/storage/offline_database.hpp>
 #include <mbgl/storage/offline_download.hpp>
+#include <mbgl/storage/bundle_tiles_provider.hpp>
 
 #include <mbgl/util/platform.hpp>
 #include <mbgl/util/url.hpp>
@@ -61,6 +62,18 @@ public:
             callback({}, offlineDatabase.createRegion(definition, metadata));
         } catch (...) {
             callback(std::current_exception(), {});
+        }
+    }
+    
+    void processPackForRegion(const OfflineRegionDefinition& definition,
+                              const OfflineRegionMetadata& metadata,
+                              const std::string& path,
+                              std::function<void (std::exception_ptr)> callback ) {
+        BundleTilesProvider provider = BundleTilesProvider(path);
+        if (offlineDatabase.putTilesForRegion(provider, definition, metadata)) {
+            callback(nullptr);
+        } else {
+            callback(std::make_exception_ptr(std::make_exception_ptr(std::runtime_error("Error putting custom tiles for a region"))));
         }
     }
     
@@ -222,6 +235,13 @@ void DefaultFileSource::createOfflineRegion(const OfflineRegionDefinition& defin
     thread->invoke(&Impl::createRegion, definition, metadata, callback);
 }
 
+void DefaultFileSource::processPackForRegion(const OfflineRegionDefinition& definition,
+                                                const OfflineRegionMetadata& metadata,
+                                                const std::string& path,
+                                                std::function<void (std::exception_ptr)> callback ) {
+    thread->invoke(&Impl::processPackForRegion, definition, metadata, path, callback);
+}
+    
 void DefaultFileSource::updateOfflineMetadata(const int64_t regionID,
                                             const OfflineRegionMetadata& metadata,
                                             std::function<void (std::exception_ptr, optional<OfflineRegionMetadata>)> callback) {
