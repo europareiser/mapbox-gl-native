@@ -8,7 +8,6 @@ namespace mbgl {
 
 class BundleTilesProvider {
     public:
-        uint64_t getOfflineMapboxTileCount();
         bool nextResource(mbgl::Resource &resource, mbgl::Response &response);
         void reset();
         

@@ -31,6 +31,8 @@ macro(mbgl_platform_core)
         PRIVATE platform/default/mbgl/storage/offline_database.hpp
         PRIVATE platform/default/mbgl/storage/offline_download.cpp
         PRIVATE platform/default/mbgl/storage/offline_download.hpp
+	PRIVATE platform/default/mbgl/storage/bundle_tiles_provider.hpp
+	PRIVATE platform/default/mbgl/storage/bundle_tiles_provider.cpp
         PRIVATE platform/default/sqlite3.cpp
         PRIVATE platform/default/sqlite3.hpp
 

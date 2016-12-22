@@ -20,12 +20,6 @@ namespace mbgl {
             Log::Error(Event::Database, ex.code, ex.what());
         }
     }
-        
-    uint64_t BundleTilesProvider::getOfflineMapboxTileCount() {
-        mapbox::sqlite::Statement stmt = db->prepare("SELECT count(*) FROM tiles");
-        stmt.run();
-        return stmt.get<uint64_t>(0);
-    }
 
     bool BundleTilesProvider::nextResource(mbgl::Resource &resource_, mbgl::Response &response_) {
         bool result = false;
