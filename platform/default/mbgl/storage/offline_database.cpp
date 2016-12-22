@@ -563,31 +563,65 @@ bool OfflineDatabase::putTilesForRegion(BundleTilesProvider& tilesProvider,
     
     try {
         createRegion(definition, metadata);
-        Resource *resource = nullptr;
-        Response *response = nullptr;
-        while (tilesProvider.nextResource(*resource, *response)) {
-            Statement insert = getStatement(
-                "INSERT INTO tiles (url_template, pixel_ratio, x,  y,  z,  modified,  expires,  accessed,  data, compressed) "
-                "VALUES            (?1,           ?2,          ?3, ?4, ?5, ?6,        ?7,       ?8,        ?9,  ?10) ");
-            insert->bind(1, resource->tileData->urlTemplate);
-            insert->bind(2, resource->tileData->pixelRatio);
-            insert->bind(3, resource->tileData->x);
-            insert->bind(4, resource->tileData->y);
-            insert->bind(5, resource->tileData->z);
-            insert->bind(6, util::now());
-            insert->bind(7, response->expires);
-            insert->bind(8, util::now());
+        std::shared_ptr<mbgl::Resource> resource = nullptr;
+        std::shared_ptr<mbgl::Response> response = nullptr;
+        while (tilesProvider.nextResource(resource, response)) {
+            
+            Statement update = getStatement(
+                                            "UPDATE tiles "
+                                            "SET modified       = ?1, "
+                                            "    expires        = ?2, "
+                                            "    accessed       = ?3, "
+                                            "    data           = ?4, "
+                                            "    compressed     = ?5 "
+                                            "WHERE url_template = ?6 "
+                                            "  AND pixel_ratio  = ?7 "
+                                            "  AND x            = ?8 "
+                                            "  AND y            = ?9 "
+                                            "  AND z            = ?10 ");
+            update->bind(1, util::now());
+            update->bind(2, response->expires);
+            update->bind(3, util::now());
+            update->bind(6, resource->tileData->urlTemplate);
+            update->bind(7, resource->tileData->pixelRatio);
+            update->bind(8, resource->tileData->x);
+            update->bind(9, resource->tileData->y);
+            update->bind(10, resource->tileData->z);
             
             if (response->noContent) {
-                insert->bind(9, nullptr);
-                insert->bind(10, false);
+                update->bind(4, nullptr);
+                update->bind(5, false);
             } else {
                 std::shared_ptr<const std::string> data = response->data;
-                insert->bindBlob(9, data->data(), data->size(), false);
-                insert->bind(10, true);
+                update->bindBlob(4, data->data(), data->size(), false);
+                update->bind(5, true);
             }
             
-            insert->run();
+            update->run();
+            if (db->changes() == 0) {
+                Statement insert = getStatement(
+                                                "INSERT INTO tiles (url_template, pixel_ratio, x,  y,  z,  modified,  expires,  accessed,  data, compressed) "
+                                                "VALUES            (?1,           ?2,          ?3, ?4, ?5, ?6,        ?7,       ?8,        ?9,  ?10) ");
+                insert->bind(1, resource->tileData->urlTemplate);
+                insert->bind(2, resource->tileData->pixelRatio);
+                insert->bind(3, resource->tileData->x);
+                insert->bind(4, resource->tileData->y);
+                insert->bind(5, resource->tileData->z);
+                insert->bind(6, util::now());
+                insert->bind(7, response->expires);
+                insert->bind(8, util::now());
+                
+                if (response->noContent) {
+                    insert->bind(9, nullptr);
+                    insert->bind(10, false);
+                } else {
+                    std::shared_ptr<const std::string> data = response->data;
+                    insert->bindBlob(9, data->data(), data->size(), false);
+                    insert->bind(10, true);
+                }
+                
+                insert->run();
+            }
         }
         transaction.commit();
         result = true;

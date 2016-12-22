@@ -8,7 +8,7 @@ namespace mbgl {
 
 class BundleTilesProvider {
     public:
-        bool nextResource(mbgl::Resource &resource, mbgl::Response &response);
+        bool nextResource(std::shared_ptr<mbgl::Resource> &resource, std::shared_ptr<mbgl::Response> &response);
         void reset();
         
         explicit BundleTilesProvider(const std::string &path);
