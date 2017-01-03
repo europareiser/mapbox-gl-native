@@ -17,6 +17,8 @@ macro(mbgl_platform_core)
         PRIVATE platform/default/default_file_source.cpp
         PRIVATE platform/default/local_file_source.cpp
         PRIVATE platform/default/online_file_source.cpp
+	PRIVATE platform/default/cascade_file_source.cpp
+        PRIVATE platform/default/mbtiles_source.cpp
 
         # Offline
         PRIVATE platform/default/mbgl/storage/offline.cpp

@@ -223,6 +223,8 @@ set(MBGL_CORE_FILES
 
     # storage
     include/mbgl/storage/default_file_source.hpp
+    include/mbgl/storage/cascade_file_source.hpp
+    include/mbgl/storage/mbtiles_source.hpp
     include/mbgl/storage/file_source.hpp
     include/mbgl/storage/network_status.hpp
     include/mbgl/storage/offline.hpp

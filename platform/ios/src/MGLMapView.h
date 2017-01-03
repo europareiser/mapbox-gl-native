@@ -1095,6 +1095,9 @@ IB_DESIGNABLE
  */
 - (void)removeOverlays:(NS_ARRAY_OF(id <MGLOverlay>) *)overlays;
 
+#pragma mark Offline
+- (void)useOfflineBundleAtPath:(NSString *)path;
+
 #pragma mark Accessing the Underlying Map Data
 
 /**
