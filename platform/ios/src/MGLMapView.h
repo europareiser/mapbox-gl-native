@@ -103,6 +103,8 @@ IB_DESIGNABLE
  */
 - (instancetype)initWithFrame:(CGRect)frame styleURL:(nullable NSURL *)styleURL;
 
+- (instancetype)initWithFrame:(CGRect)aFrame styleURL:(nullable NSURL *)aStyleURL offlnieBundlePath:(nullable NSString *)aPath;
+
 #pragma mark Accessing the Delegate
 
 /**
@@ -1094,9 +1096,6 @@ IB_DESIGNABLE
     protocol.
  */
 - (void)removeOverlays:(NS_ARRAY_OF(id <MGLOverlay>) *)overlays;
-
-#pragma mark Offline
-- (void)useOfflineBundleAtPath:(NSString *)path;
 
 #pragma mark Accessing the Underlying Map Data
 

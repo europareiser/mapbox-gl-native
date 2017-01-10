@@ -29,7 +29,6 @@
 #include <mbgl/util/chrono.hpp>
 #include <mbgl/util/run_loop.hpp>
 #include <mbgl/storage/cascade_file_source.hpp>
-#include <mbgl/storage/mbtiles_source.hpp>
 
 #import "Mapbox.h"
 #import "MGLFeature_Private.h"
@@ -263,6 +262,7 @@ public:
 @property (nonatomic) MGLAnnotationContainerView *annotationContainerView;
 @property (nonatomic) MGLUserLocation *userLocation;
 @property (nonatomic) NS_MUTABLE_DICTIONARY_OF(NSString *, NS_MUTABLE_ARRAY_OF(MGLAnnotationView *) *) *annotationViewReuseQueueByIdentifier;
+@property (nonatomic, copy) NSString *offlineBundlePath;
 
 @end
 
@@ -336,6 +336,18 @@ public:
     {
         [self commonInit];
         self.styleURL = styleURL;
+    }
+    return self;
+}
+
+- (instancetype)initWithFrame:(CGRect)aFrame styleURL:(nullable NSURL *)aStyleURL offlnieBundlePath:(nullable NSString *)aPath
+{
+    self = [super initWithFrame:aFrame];
+    if (self != nil)
+    {   
+        self.offlineBundlePath = aPath;
+        [self commonInit];
+        self.styleURL = aStyleURL;
     }
     return self;
 }
@@ -427,8 +439,15 @@ public:
     mbgl::DefaultFileSource *mbglFileSource = [MGLOfflineStorage sharedOfflineStorage].mbglFileSource;
     const float scaleFactor = [UIScreen instancesRespondToSelector:@selector(nativeScale)] ? [[UIScreen mainScreen] nativeScale] : [[UIScreen mainScreen] scale];
     _mbglThreadPool = new mbgl::ThreadPool(4);
-    //_cascadeFileSource = new mbgl::CascadeFileSource(*mbglFileSource);
-    _mbglMap = new mbgl::Map(*_mbglView, size, scaleFactor, *mbglFileSource, *_mbglThreadPool, mbgl::MapMode::Continuous, mbgl::GLContextMode::Unique, mbgl::ConstrainMode::None, mbgl::ViewportMode::Default);
+    
+    if ( (self.offlineBundlePath != nil) && ([[NSFileManager defaultManager] fileExistsAtPath:self.offlineBundlePath]) ) {
+        _cascadeFileSource = new mbgl::CascadeFileSource(*mbglFileSource);
+        _cascadeFileSource->setPrimaryFileSourcePath(self.offlineBundlePath.UTF8String);
+        _mbglMap = new mbgl::Map(*_mbglView, size, scaleFactor, *_cascadeFileSource, *_mbglThreadPool, mbgl::MapMode::Continuous, mbgl::GLContextMode::Unique, mbgl::ConstrainMode::None, mbgl::ViewportMode::Default);
+    }
+    else {
+        _mbglMap = new mbgl::Map(*_mbglView, size, scaleFactor, *mbglFileSource, *_mbglThreadPool, mbgl::MapMode::Continuous, mbgl::GLContextMode::Unique, mbgl::ConstrainMode::None, mbgl::ViewportMode::Default);
+    }
     [self validateTileCacheSize];
 
     // start paused if in IB
@@ -2813,19 +2832,6 @@ public:
 - (void)removeStyleClass:(NSString *)styleClass
 {
     [self.style removeStyleClass:styleClass];
-}
-
-#pragma mark  Offline
-- (void)useOfflineBundleAtPath:(NSString *)path
-{
-    if(_cascadeFileSource) {
-        if([[NSFileManager defaultManager] fileExistsAtPath:path]) {
-            mbgl::MBTilesSource *tilesBundle = new mbgl::MBTilesSource(path.UTF8String);
-            _cascadeFileSource->setPrimaryFileSource(std::unique_ptr<mbgl::FileSource>(tilesBundle));
-        } else {
-            NSLog(@"Unable to find offline bundle %@", path);
-        }
-    }
 }
 
 #pragma mark - Annotations -
