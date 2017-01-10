@@ -103,7 +103,7 @@ IB_DESIGNABLE
  */
 - (instancetype)initWithFrame:(CGRect)frame styleURL:(nullable NSURL *)styleURL;
 
-- (instancetype)initWithFrame:(CGRect)aFrame styleURL:(nullable NSURL *)aStyleURL offlnieBundlePath:(nullable NSString *)aPath;
+- (instancetype)initWithFrame:(CGRect)aFrame styleURL:(nullable NSURL *)aStyleURL offlineBundlePath:(nullable NSString *)aPath;
 
 #pragma mark Accessing the Delegate
 

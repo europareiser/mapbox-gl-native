@@ -271,7 +271,6 @@ public:
     mbgl::Map *_mbglMap;
     MBGLView *_mbglView;
     mbgl::ThreadPool *_mbglThreadPool;
-    mbgl::CascadeFileSource *_cascadeFileSource;
 
     BOOL _opaque;
 
@@ -340,7 +339,7 @@ public:
     return self;
 }
 
-- (instancetype)initWithFrame:(CGRect)aFrame styleURL:(nullable NSURL *)aStyleURL offlnieBundlePath:(nullable NSString *)aPath
+- (instancetype)initWithFrame:(CGRect)aFrame styleURL:(nullable NSURL *)aStyleURL offlineBundlePath:(nullable NSString *)aPath
 {
     self = [super initWithFrame:aFrame];
     if (self != nil)
@@ -441,9 +440,9 @@ public:
     _mbglThreadPool = new mbgl::ThreadPool(4);
     
     if ( (self.offlineBundlePath != nil) && ([[NSFileManager defaultManager] fileExistsAtPath:self.offlineBundlePath]) ) {
-        _cascadeFileSource = new mbgl::CascadeFileSource(*mbglFileSource);
-        _cascadeFileSource->setPrimaryFileSourcePath(self.offlineBundlePath.UTF8String);
-        _mbglMap = new mbgl::Map(*_mbglView, size, scaleFactor, *_cascadeFileSource, *_mbglThreadPool, mbgl::MapMode::Continuous, mbgl::GLContextMode::Unique, mbgl::ConstrainMode::None, mbgl::ViewportMode::Default);
+        mbgl::CascadeFileSource *cascadeFileSource = new mbgl::CascadeFileSource(*mbglFileSource);
+        cascadeFileSource->setPrimaryFileSourcePath(self.offlineBundlePath.UTF8String);
+        _mbglMap = new mbgl::Map(*_mbglView, size, scaleFactor, *cascadeFileSource, *_mbglThreadPool, mbgl::MapMode::Continuous, mbgl::GLContextMode::Unique, mbgl::ConstrainMode::None, mbgl::ViewportMode::Default);
     }
     else {
         _mbglMap = new mbgl::Map(*_mbglView, size, scaleFactor, *mbglFileSource, *_mbglThreadPool, mbgl::MapMode::Continuous, mbgl::GLContextMode::Unique, mbgl::ConstrainMode::None, mbgl::ViewportMode::Default);
@@ -700,11 +699,6 @@ public:
     {
         delete _mbglThreadPool;
         _mbglThreadPool = nullptr;
-    }
-    
-    if (_cascadeFileSource) {
-        delete _cascadeFileSource;
-        _cascadeFileSource = nullptr;
     }
 
     if ([[EAGLContext currentContext] isEqual:_context])
