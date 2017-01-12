@@ -93,7 +93,7 @@ optional<std::pair<Response, uint64_t>> MBTilesSource::getTile(const Resource::T
     if (!data) {
         response.noContent = true;
     } else {
-        response.data = std::make_shared<std::string>(util::decompress(*data));
+        response.data = std::make_shared<std::string>(data);
         size = data->length();
         Log::Info(Event::Database, "==> tile (%d, %d, %d [%d])", tile.z, tile.x, tile.y, y);
     }
