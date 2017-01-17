@@ -59,18 +59,18 @@ typedef NS_ENUM(NSUInteger, MGLLineJoin) {
 /**
  Controls the translation reference point.
  
- Values of this type are used in the `MGLLineStyleLayer.lineTranslateAnchor`
+ Values of this type are used in the `MGLLineStyleLayer.lineTranslationAnchor`
  property.
  */
-typedef NS_ENUM(NSUInteger, MGLLineTranslateAnchor) {
+typedef NS_ENUM(NSUInteger, MGLLineTranslationAnchor) {
     /**
      The line is translated relative to the map.
      */
-    MGLLineTranslateAnchorMap,
+    MGLLineTranslationAnchorMap,
     /**
      The line is translated relative to the viewport.
      */
-    MGLLineTranslateAnchorViewport,
+    MGLLineTranslationAnchorViewport,
 };
 
 /**
@@ -87,8 +87,21 @@ typedef NS_ENUM(NSUInteger, MGLLineTranslateAnchor) {
  otherwise, find it using the `MGLStyle.layers` property. You can also create a
  new line style layer and add it to the style using a method such as
  `-[MGLStyle addLayer:]`.
-
- <!--EXAMPLE: MGLLineStyleLayer-->
+ 
+ ### Example
+ 
+ ```swift
+ let layer = MGLLineStyleLayer(identifier: "trails-path", source: trails)
+ layer.sourceLayerIdentifier = "trails"
+ layer.lineWidth = MGLStyleValue(interpolationBase: 1.5, stops: [
+     14: MGLStyleValue(rawValue: 2),
+     18: MGLStyleValue(rawValue: 20),
+ ])
+ layer.lineColor = MGLStyleValue(rawValue: .brown)
+ layer.lineCap = MGLStyleValue(rawValue: NSValue(mglLineCap: .round))
+ layer.predicate = NSPredicate(format: "%K == %@", "trail-type", "mountain-biking")
+ mapView.style?.addLayer(layer)
+ ```
  */
 @interface MGLLineStyleLayer : MGLVectorStyleLayer
 
@@ -162,7 +175,7 @@ typedef NS_ENUM(NSUInteger, MGLLineTranslateAnchor) {
  This property is only applied to the style if `linePattern` is set to `nil`.
  Otherwise, it is ignored.
  */
-@property (nonatomic, null_resettable) MGLStyleValue<MGLColor *> *lineColor;
+@property (nonatomic, null_resettable) MGLStyleValue<UIColor *> *lineColor;
 #else
 /**
  The color with which the line will be drawn.
@@ -174,7 +187,7 @@ typedef NS_ENUM(NSUInteger, MGLLineTranslateAnchor) {
  This property is only applied to the style if `linePattern` is set to `nil`.
  Otherwise, it is ignored.
  */
-@property (nonatomic, null_resettable) MGLStyleValue<MGLColor *> *lineColor;
+@property (nonatomic, null_resettable) MGLStyleValue<NSColor *> *lineColor;
 #endif
 
 /**
@@ -188,7 +201,7 @@ typedef NS_ENUM(NSUInteger, MGLLineTranslateAnchor) {
  Otherwise, it is ignored.
  
  This attribute corresponds to the <a
- href="https://www.mapbox.com/mapbox-gl-style-spec/#layout-line-line-dasharray"><code>line-dasharray</code></a>
+ href="https://www.mapbox.com/mapbox-gl-style-spec/#paint-line-dasharray"><code>line-dasharray</code></a>
  layout property in the Mapbox Style Specification.
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSArray<NSNumber *> *> *lineDashPattern;
@@ -236,29 +249,57 @@ typedef NS_ENUM(NSUInteger, MGLLineTranslateAnchor) {
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSString *> *linePattern;
 
+#if TARGET_OS_IPHONE
 /**
  The geometry's offset.
  
  This property is measured in points.
  
  The default value of this property is an `MGLStyleValue` object containing an
- `NSValue` object containing a `CGVector` struct set to 0 points from the left
- and 0 points from the top. Set this property to `nil` to reset it to the
- default value.
+ `NSValue` object containing a `CGVector` struct set to 0 points rightward and 0
+ points downward. Set this property to `nil` to reset it to the default value.
+ 
+ This attribute corresponds to the <a
+ href="https://www.mapbox.com/mapbox-gl-style-spec/#paint-line-translate"><code>line-translate</code></a>
+ layout property in the Mapbox Style Specification.
  */
-@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *lineTranslate;
+@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *lineTranslation;
+#else
+/**
+ The geometry's offset.
+ 
+ This property is measured in points.
+ 
+ The default value of this property is an `MGLStyleValue` object containing an
+ `NSValue` object containing a `CGVector` struct set to 0 points rightward and 0
+ points upward. Set this property to `nil` to reset it to the default value.
+ 
+ This attribute corresponds to the <a
+ href="https://www.mapbox.com/mapbox-gl-style-spec/#paint-line-translate"><code>line-translate</code></a>
+ layout property in the Mapbox Style Specification.
+ */
+@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *lineTranslation;
+#endif
+
+@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *lineTranslate __attribute__((unavailable("Use lineTranslation instead.")));
 
 /**
  Controls the translation reference point.
  
  The default value of this property is an `MGLStyleValue` object containing an
- `NSValue` object containing `MGLLineTranslateAnchorMap`. Set this property to
+ `NSValue` object containing `MGLLineTranslationAnchorMap`. Set this property to
  `nil` to reset it to the default value.
  
- This property is only applied to the style if `lineTranslate` is non-`nil`.
+ This property is only applied to the style if `lineTranslation` is non-`nil`.
  Otherwise, it is ignored.
+ 
+ This attribute corresponds to the <a
+ href="https://www.mapbox.com/mapbox-gl-style-spec/#paint-line-translate-anchor"><code>line-translate-anchor</code></a>
+ layout property in the Mapbox Style Specification.
  */
-@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *lineTranslateAnchor;
+@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *lineTranslationAnchor;
+
+@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *lineTranslateAnchor __attribute__((unavailable("Use lineTranslationAnchor instead.")));
 
 /**
  Stroke thickness.
@@ -270,6 +311,55 @@ typedef NS_ENUM(NSUInteger, MGLLineTranslateAnchor) {
  it to the default value.
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *lineWidth;
+
+@end
+
+/**
+ Methods for wrapping an enumeration value for a style layer attribute in an
+ `MGLLineStyleLayer` object and unwrapping its raw value.
+ */
+@interface NSValue (MGLLineStyleLayerAdditions)
+
+#pragma mark Working with Line Style Layer Attribute Values
+
+/**
+ Creates a new value object containing the given `MGLLineCap` enumeration.
+
+ @param lineCap The value for the new object.
+ @return A new value object that contains the enumeration value.
+ */
++ (instancetype)valueWithMGLLineCap:(MGLLineCap)lineCap;
+
+/**
+ The `MGLLineCap` enumeration representation of the value.
+ */
+@property (readonly) MGLLineCap MGLLineCapValue;
+
+/**
+ Creates a new value object containing the given `MGLLineJoin` enumeration.
+
+ @param lineJoin The value for the new object.
+ @return A new value object that contains the enumeration value.
+ */
++ (instancetype)valueWithMGLLineJoin:(MGLLineJoin)lineJoin;
+
+/**
+ The `MGLLineJoin` enumeration representation of the value.
+ */
+@property (readonly) MGLLineJoin MGLLineJoinValue;
+
+/**
+ Creates a new value object containing the given `MGLLineTranslationAnchor` enumeration.
+
+ @param lineTranslationAnchor The value for the new object.
+ @return A new value object that contains the enumeration value.
+ */
++ (instancetype)valueWithMGLLineTranslationAnchor:(MGLLineTranslationAnchor)lineTranslationAnchor;
+
+/**
+ The `MGLLineTranslationAnchor` enumeration representation of the value.
+ */
+@property (readonly) MGLLineTranslationAnchor MGLLineTranslationAnchorValue;
 
 @end
 

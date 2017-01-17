@@ -4,6 +4,7 @@
 #import "LimeGreenStyleLayer.h"
 #import "DroppedPinAnnotation.h"
 
+#import "MGLStyle+MBXAdditions.h"
 #import "MGLVectorSource+MBXAdditions.h"
 
 #import <Mapbox/Mapbox.h>
@@ -145,11 +146,12 @@ NS_ARRAY_OF(id <MGLAnnotation>) *MBXFlattenedShapes(NS_ARRAY_OF(id <MGLAnnotatio
 
 - (NSURL *)shareURL {
     NSArray *components = self.mapView.styleURL.pathComponents;
-    CLLocationCoordinate2D centerCoordinate = self.mapView.centerCoordinate;
+    MGLMapCamera *camera = self.mapView.camera;
     return [NSURL URLWithString:
-            [NSString stringWithFormat:@"https://api.mapbox.com/styles/v1/%@/%@.html?access_token=%@#%.2f/%.5f/%.5f/%.f",
+            [NSString stringWithFormat:@"https://api.mapbox.com/styles/v1/%@/%@.html?access_token=%@#%.2f/%.5f/%.5f/%.f/%.f",
              components[1], components[2], [MGLAccountManager accessToken],
-             self.mapView.zoomLevel, centerCoordinate.latitude, centerCoordinate.longitude, self.mapView.direction]];
+             self.mapView.zoomLevel, camera.centerCoordinate.latitude, camera.centerCoordinate.longitude,
+             camera.heading, camera.pitch]];
 }
 
 #pragma mark View methods
@@ -256,7 +258,7 @@ NS_ARRAY_OF(id <MGLAnnotation>) *MBXFlattenedShapes(NS_ARRAY_OF(id <MGLAnnotatio
 }
 
 - (void)toggleStyleLayersAtArrangedObjectIndexes:(NSIndexSet *)indices {
-    NS_ARRAY_OF(MGLStyleLayer *) *layers = [self.mapView.style.layers objectsAtIndexes:indices];
+    NS_ARRAY_OF(MGLStyleLayer *) *layers = [self.mapView.style.reversedLayers objectsAtIndexes:indices];
     BOOL isVisible = layers.firstObject.visible;
     [self.undoManager registerUndoWithTarget:self handler:^(MapDocument * _Nonnull target) {
         [target toggleStyleLayersAtArrangedObjectIndexes:indices];
@@ -312,7 +314,7 @@ NS_ARRAY_OF(id <MGLAnnotation>) *MBXFlattenedShapes(NS_ARRAY_OF(id <MGLAnnotatio
 }
 
 - (void)deleteStyleLayersAtArrangedObjectIndexes:(NSIndexSet *)indices {
-    NS_ARRAY_OF(MGLStyleLayer *) *layers = [self.mapView.style.layers objectsAtIndexes:indices];
+    NS_ARRAY_OF(MGLStyleLayer *) *layers = [self.mapView.style.reversedLayers objectsAtIndexes:indices];
     [self.undoManager registerUndoWithTarget:self handler:^(id  _Nonnull target) {
         [self insertStyleLayers:layers atArrangedObjectIndexes:indices];
     }];
@@ -368,18 +370,18 @@ NS_ARRAY_OF(id <MGLAnnotation>) *MBXFlattenedShapes(NS_ARRAY_OF(id <MGLAnnotatio
             return localizedString;
         };
         
-        if ([layer.textField isKindOfClass:[MGLStyleConstantValue class]]) {
-            NSString *textField = [(MGLStyleConstantValue<NSString *> *)layer.textField rawValue];
-            layer.textField = [MGLStyleValue<NSString *> valueWithRawValue:stringByLocalizingString(textField)];
-        } else if ([layer.textField isKindOfClass:[MGLStyleFunction class]]) {
-            MGLStyleFunction *function = (MGLStyleFunction<NSString *> *)layer.textField;
+        if ([layer.text isKindOfClass:[MGLStyleConstantValue class]]) {
+            NSString *textField = [(MGLStyleConstantValue<NSString *> *)layer.text rawValue];
+            layer.text = [MGLStyleValue<NSString *> valueWithRawValue:stringByLocalizingString(textField)];
+        } else if ([layer.text isKindOfClass:[MGLStyleFunction class]]) {
+            MGLStyleFunction *function = (MGLStyleFunction<NSString *> *)layer.text;
             NSMutableDictionary *stops = function.stops.mutableCopy;
             [stops enumerateKeysAndObjectsUsingBlock:^(NSNumber *zoomLevel, MGLStyleConstantValue<NSString *> *stop, BOOL *done) {
                 NSString *textField = stop.rawValue;
                 stops[zoomLevel] = [MGLStyleValue<NSString *> valueWithRawValue:stringByLocalizingString(textField)];
             }];
             function.stops = stops;
-            layer.textField = function;
+            layer.text = function;
         }
     }
 }
@@ -825,7 +827,7 @@ NS_ARRAY_OF(id <MGLAnnotation>) *MBXFlattenedShapes(NS_ARRAY_OF(id <MGLAnnotatio
         if (row == -1) {
             menuItem.title = @"Show";
         } else {
-            BOOL isVisible = self.mapView.style.layers[row].visible;
+            BOOL isVisible = self.mapView.style.reversedLayers[row].visible;
             menuItem.title = isVisible ? @"Hide" : @"Show";
         }
         return row != -1;
@@ -1086,9 +1088,8 @@ NS_ARRAY_OF(id <MGLAnnotation>) *MBXFlattenedShapes(NS_ARRAY_OF(id <MGLAnnotatio
     }
 }
 
-- (NSColor *)mapView:(MGLMapView *)mapView fillColorForPolygonAnnotation:(MGLPolygon *)annotation {
-    NSColor *color = [[NSColor selectedMenuItemColor] colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
-    return [color colorWithAlphaComponent:0.8];
+- (CGFloat)mapView:(MGLMapView *)mapView alphaForShapeAnnotation:(MGLShape *)annotation {
+    return 0.8;
 }
 
 @end

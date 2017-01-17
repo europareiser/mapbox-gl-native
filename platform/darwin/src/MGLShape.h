@@ -17,6 +17,10 @@ NS_ASSUME_NONNULL_BEGIN
  types in the GeoJSON standard, but some have nonstandard names for backwards
  compatibility.
  
+ Although you do not create instances of this class directly, you can use its
+ `+[MGLShape shapeWithData:encoding:error:]` factory method to create one of the
+ concrete subclasses of `MGLShape` noted above from GeoJSON data.
+ 
  You can add shapes to the map by adding them to an `MGLShapeSource` object.
  Configure the appearance of an `MGLShapeSource`’s or `MGLVectorSource`’s shapes
  collectively using a concrete instance of `MGLVectorStyleLayer`. Alternatively,
@@ -36,6 +40,14 @@ NS_ASSUME_NONNULL_BEGIN
  `MGLShape` that conforms to the `MGLFeature` protocol. If it is a feature
  collection object, the returned value is an instance of
  `MGLShapeCollectionFeature`.
+ 
+ ### Example
+ 
+ ```swift
+ let url = mainBundle.url(forResource: "amsterdam", withExtension: "geojson")!
+ let data = try! Data(contentsOf: url)
+ let feature = try! MGLShape(data: data, encoding: String.Encoding.utf8.rawValue) as! MGLShapeCollectionFeature
+ ```
  
  @param data String data containing GeoJSON source code.
  @param encoding The encoding used by `data`.

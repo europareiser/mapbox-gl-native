@@ -163,6 +163,10 @@ macos-test: $(MACOS_PROJ_PATH)
 xpackage: $(MACOS_PROJ_PATH)
 	SYMBOLS=$(SYMBOLS) ./platform/macos/scripts/package.sh
 
+.PHONY: xdeploy
+xdeploy:
+	caffeinate -i ./platform/macos/scripts/deploy-packages.sh
+
 .PHONY: xdocument
 xdocument:
 	OUTPUT=$(OUTPUT) ./platform/macos/scripts/document.sh
@@ -275,6 +279,10 @@ idocument:
 
 style-code-darwin:
 	node platform/darwin/scripts/generate-style-code.js
+	node platform/darwin/scripts/update-examples.js
+
+darwin-update-examples:
+	node platform/darwin/scripts/update-examples.js
 endif
 
 #### Linux targets #####################################################

@@ -9,18 +9,18 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Controls the translation reference point.
  
- Values of this type are used in the `MGLFillStyleLayer.fillTranslateAnchor`
+ Values of this type are used in the `MGLFillStyleLayer.fillTranslationAnchor`
  property.
  */
-typedef NS_ENUM(NSUInteger, MGLFillTranslateAnchor) {
+typedef NS_ENUM(NSUInteger, MGLFillTranslationAnchor) {
     /**
      The fill is translated relative to the map.
      */
-    MGLFillTranslateAnchorMap,
+    MGLFillTranslationAnchorMap,
     /**
      The fill is translated relative to the viewport.
      */
-    MGLFillTranslateAnchorViewport,
+    MGLFillTranslationAnchorViewport,
 };
 
 /**
@@ -37,8 +37,16 @@ typedef NS_ENUM(NSUInteger, MGLFillTranslateAnchor) {
  otherwise, find it using the `MGLStyle.layers` property. You can also create a
  new fill style layer and add it to the style using a method such as
  `-[MGLStyle addLayer:]`.
-
- <!--EXAMPLE: MGLFillStyleLayer-->
+ 
+ ### Example
+ 
+ ```swift
+ let layer = MGLFillStyleLayer(identifier: "parks", source: parks)
+ layer.sourceLayerIdentifier = "parks"
+ layer.fillColor = MGLStyleValue(rawValue: .green)
+ layer.predicate = NSPredicate(format: "type == %@", "national-park")
+ mapView.style?.addLayer(layer)
+ ```
  */
 @interface MGLFillStyleLayer : MGLVectorStyleLayer
 
@@ -52,7 +60,7 @@ typedef NS_ENUM(NSUInteger, MGLFillTranslateAnchor) {
  the default value.
  
  This attribute corresponds to the <a
- href="https://www.mapbox.com/mapbox-gl-style-spec/#layout-fill-fill-antialias"><code>fill-antialias</code></a>
+ href="https://www.mapbox.com/mapbox-gl-style-spec/#paint-fill-antialias"><code>fill-antialias</code></a>
  layout property in the Mapbox Style Specification.
  */
 @property (nonatomic, null_resettable, getter=isFillAntialiased) MGLStyleValue<NSNumber *> *fillAntialiased;
@@ -70,7 +78,7 @@ typedef NS_ENUM(NSUInteger, MGLFillTranslateAnchor) {
  This property is only applied to the style if `fillPattern` is set to `nil`.
  Otherwise, it is ignored.
  */
-@property (nonatomic, null_resettable) MGLStyleValue<MGLColor *> *fillColor;
+@property (nonatomic, null_resettable) MGLStyleValue<UIColor *> *fillColor;
 #else
 /**
  The color of the filled part of this layer.
@@ -82,7 +90,7 @@ typedef NS_ENUM(NSUInteger, MGLFillTranslateAnchor) {
  This property is only applied to the style if `fillPattern` is set to `nil`.
  Otherwise, it is ignored.
  */
-@property (nonatomic, null_resettable) MGLStyleValue<MGLColor *> *fillColor;
+@property (nonatomic, null_resettable) MGLStyleValue<NSColor *> *fillColor;
 #endif
 
 /**
@@ -95,6 +103,7 @@ typedef NS_ENUM(NSUInteger, MGLFillTranslateAnchor) {
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *fillOpacity;
 
+#if TARGET_OS_IPHONE
 /**
  The outline color of the fill. Matches the value of `fillColor` if unspecified.
  
@@ -102,7 +111,17 @@ typedef NS_ENUM(NSUInteger, MGLFillTranslateAnchor) {
  and `fillAntialiased` is set to an `MGLStyleValue` object containing an
  `NSNumber` object containing `YES`. Otherwise, it is ignored.
  */
-@property (nonatomic, null_resettable) MGLStyleValue<MGLColor *> *fillOutlineColor;
+@property (nonatomic, null_resettable) MGLStyleValue<UIColor *> *fillOutlineColor;
+#else
+/**
+ The outline color of the fill. Matches the value of `fillColor` if unspecified.
+ 
+ This property is only applied to the style if `fillPattern` is set to `nil`,
+ and `fillAntialiased` is set to an `MGLStyleValue` object containing an
+ `NSNumber` object containing `YES`. Otherwise, it is ignored.
+ */
+@property (nonatomic, null_resettable) MGLStyleValue<NSColor *> *fillOutlineColor;
+#endif
 
 /**
  Name of image in sprite to use for drawing image fills. For seamless patterns,
@@ -110,29 +129,80 @@ typedef NS_ENUM(NSUInteger, MGLFillTranslateAnchor) {
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSString *> *fillPattern;
 
+#if TARGET_OS_IPHONE
 /**
  The geometry's offset.
  
  This property is measured in points.
  
  The default value of this property is an `MGLStyleValue` object containing an
- `NSValue` object containing a `CGVector` struct set to 0 points from the left
- and 0 points from the top. Set this property to `nil` to reset it to the
- default value.
+ `NSValue` object containing a `CGVector` struct set to 0 points rightward and 0
+ points downward. Set this property to `nil` to reset it to the default value.
+ 
+ This attribute corresponds to the <a
+ href="https://www.mapbox.com/mapbox-gl-style-spec/#paint-fill-translate"><code>fill-translate</code></a>
+ layout property in the Mapbox Style Specification.
  */
-@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *fillTranslate;
+@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *fillTranslation;
+#else
+/**
+ The geometry's offset.
+ 
+ This property is measured in points.
+ 
+ The default value of this property is an `MGLStyleValue` object containing an
+ `NSValue` object containing a `CGVector` struct set to 0 points rightward and 0
+ points upward. Set this property to `nil` to reset it to the default value.
+ 
+ This attribute corresponds to the <a
+ href="https://www.mapbox.com/mapbox-gl-style-spec/#paint-fill-translate"><code>fill-translate</code></a>
+ layout property in the Mapbox Style Specification.
+ */
+@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *fillTranslation;
+#endif
+
+@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *fillTranslate __attribute__((unavailable("Use fillTranslation instead.")));
 
 /**
  Controls the translation reference point.
  
  The default value of this property is an `MGLStyleValue` object containing an
- `NSValue` object containing `MGLFillTranslateAnchorMap`. Set this property to
+ `NSValue` object containing `MGLFillTranslationAnchorMap`. Set this property to
  `nil` to reset it to the default value.
  
- This property is only applied to the style if `fillTranslate` is non-`nil`.
+ This property is only applied to the style if `fillTranslation` is non-`nil`.
  Otherwise, it is ignored.
+ 
+ This attribute corresponds to the <a
+ href="https://www.mapbox.com/mapbox-gl-style-spec/#paint-fill-translate-anchor"><code>fill-translate-anchor</code></a>
+ layout property in the Mapbox Style Specification.
  */
-@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *fillTranslateAnchor;
+@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *fillTranslationAnchor;
+
+@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *fillTranslateAnchor __attribute__((unavailable("Use fillTranslationAnchor instead.")));
+
+@end
+
+/**
+ Methods for wrapping an enumeration value for a style layer attribute in an
+ `MGLFillStyleLayer` object and unwrapping its raw value.
+ */
+@interface NSValue (MGLFillStyleLayerAdditions)
+
+#pragma mark Working with Fill Style Layer Attribute Values
+
+/**
+ Creates a new value object containing the given `MGLFillTranslationAnchor` enumeration.
+
+ @param fillTranslationAnchor The value for the new object.
+ @return A new value object that contains the enumeration value.
+ */
++ (instancetype)valueWithMGLFillTranslationAnchor:(MGLFillTranslationAnchor)fillTranslationAnchor;
+
+/**
+ The `MGLFillTranslationAnchor` enumeration representation of the value.
+ */
+@property (readonly) MGLFillTranslationAnchor MGLFillTranslationAnchorValue;
 
 @end
 
