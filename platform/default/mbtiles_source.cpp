@@ -1,5 +1,4 @@
 #include <mbgl/storage/mbtiles_source.hpp>
-#include <mbgl/platform/log.hpp>
 
 //#include <mbgl/util/platform.hpp>
 #include <mbgl/util/url.hpp>
@@ -31,7 +30,6 @@ MBTilesSource::~MBTilesSource() {
         statements.clear();
         db.reset();
     } catch (mapbox::sqlite::Exception& ex) {
-        Log::Error(Event::Database, ex.code, ex.what());
     }
 }
     
@@ -76,7 +74,6 @@ optional<std::pair<Response, uint64_t>> MBTilesSource::getInternal(const Resourc
 optional<std::pair<Response, uint64_t>> MBTilesSource::getTile(const Resource::TileData& tile) {
     Statement stmt = getStatement("SELECT tile_data FROM tiles WHERE zoom_level = ?1 AND tile_column = ?2 AND tile_row = ?3");
     int32_t y = (1 << tile.z) - tile.y - 1; // flip y for mbtiles
-    Log::Info(Event::Database, "Finding tile (%d, %d, %d [%d])", tile.z, tile.x, tile.y, y);
     
     stmt->bind(1, tile.z);
     stmt->bind(2, tile.x);
@@ -95,7 +92,6 @@ optional<std::pair<Response, uint64_t>> MBTilesSource::getTile(const Resource::T
     } else {
         response.data = std::make_shared<std::string>(util::decompress(*data));
         size = response.data->length();
-        Log::Info(Event::Database, "==> tile (%d, %d, %d [%d])", tile.z, tile.x, tile.y, y);
     }
     return std::make_pair(response, size);
 }

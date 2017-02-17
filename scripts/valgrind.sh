@@ -3,9 +3,10 @@
 set -e
 set -o pipefail
 
-.mason/mason install valgrind latest
+VALGRIND_PREFIX=$(scripts/mason.sh PREFIX valgrind VERSION 3.12.0)
 
 PARAMS="\
+    --track-origins=yes \
     --leak-check=full \
     --show-leak-kinds=definite \
     --errors-for-leak-kinds=definite \
@@ -13,6 +14,6 @@ PARAMS="\
     --gen-suppressions=all \
     --suppressions=scripts/valgrind.sup"
 
-export VALGRIND_LIB=$(.mason/mason prefix valgrind latest)/lib/valgrind
+export VALGRIND_LIB=${VALGRIND_PREFIX}/lib/valgrind
 
-$(.mason/mason prefix valgrind latest)/bin/valgrind $PARAMS $@
+${VALGRIND_PREFIX}/bin/valgrind $PARAMS $@
