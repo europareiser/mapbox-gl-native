@@ -1,5 +1,5 @@
-// This file is generated. 
-// Edit platform/darwin/scripts/generate-style-code.js, then run `make style-code-darwin`.
+// This file is generated.
+// Edit platform/darwin/scripts/generate-style-code.js, then run `make darwin-style-code`.
 
 #import "MGLSource.h"
 #import "MGLMapView_Private.h"
@@ -8,17 +8,19 @@
 #import "MGLStyleValue_Private.h"
 #import "MGLCircleStyleLayer.h"
 
+#include <mbgl/map/map.hpp>
 #include <mbgl/style/layers/circle_layer.hpp>
+
 namespace mbgl {
 
-    MBGL_DEFINE_ENUM(MGLCirclePitchScale, {
-        { MGLCirclePitchScaleMap, "map" },
-        { MGLCirclePitchScaleViewport, "viewport" },
+    MBGL_DEFINE_ENUM(MGLCircleScaleAlignment, {
+        { MGLCircleScaleAlignmentMap, "map" },
+        { MGLCircleScaleAlignmentViewport, "viewport" },
     });
 
-    MBGL_DEFINE_ENUM(MGLCircleTranslateAnchor, {
-        { MGLCircleTranslateAnchorMap, "map" },
-        { MGLCircleTranslateAnchorViewport, "viewport" },
+    MBGL_DEFINE_ENUM(MGLCircleTranslationAnchor, {
+        { MGLCircleTranslationAnchorMap, "map" },
+        { MGLCircleTranslationAnchorViewport, "viewport" },
     });
 
 }
@@ -54,6 +56,13 @@ namespace mbgl {
     super.rawLayer = rawLayer;
 }
 
+- (NSString *)sourceIdentifier
+{
+    MGLAssertStyleLayerIsValid();
+
+    return @(self.rawLayer->getSourceID().c_str());
+}
+
 - (NSString *)sourceLayerIdentifier
 {
     MGLAssertStyleLayerIsValid();
@@ -73,7 +82,7 @@ namespace mbgl {
 {
     MGLAssertStyleLayerIsValid();
 
-    self.rawLayer->setFilter(predicate.mgl_filter);
+    self.rawLayer->setFilter(predicate ? predicate.mgl_filter : mbgl::style::NullFilter());
 }
 
 - (NSPredicate *)predicate
@@ -127,100 +136,217 @@ namespace mbgl {
 - (void)setCircleBlur:(MGLStyleValue<NSNumber *> *)circleBlur {
     MGLAssertStyleLayerIsValid();
 
-    auto mbglValue = MGLStyleValueTransformer<float, NSNumber *>().toPropertyValue(circleBlur);
+    auto mbglValue = MGLStyleValueTransformer<float, NSNumber *>().toDataDrivenPropertyValue(circleBlur);
     self.rawLayer->setCircleBlur(mbglValue);
 }
 
 - (MGLStyleValue<NSNumber *> *)circleBlur {
     MGLAssertStyleLayerIsValid();
 
-    auto propertyValue = self.rawLayer->getCircleBlur() ?: self.rawLayer->getDefaultCircleBlur();
-    return MGLStyleValueTransformer<float, NSNumber *>().toStyleValue(propertyValue);
+    auto propertyValue = self.rawLayer->getCircleBlur();
+    if (propertyValue.isUndefined()) {
+        return MGLStyleValueTransformer<float, NSNumber *>().toDataDrivenStyleValue(self.rawLayer->getDefaultCircleBlur());
+    }
+    return MGLStyleValueTransformer<float, NSNumber *>().toDataDrivenStyleValue(propertyValue);
 }
 
 - (void)setCircleColor:(MGLStyleValue<MGLColor *> *)circleColor {
     MGLAssertStyleLayerIsValid();
 
-    auto mbglValue = MGLStyleValueTransformer<mbgl::Color, MGLColor *>().toPropertyValue(circleColor);
+    auto mbglValue = MGLStyleValueTransformer<mbgl::Color, MGLColor *>().toDataDrivenPropertyValue(circleColor);
     self.rawLayer->setCircleColor(mbglValue);
 }
 
 - (MGLStyleValue<MGLColor *> *)circleColor {
     MGLAssertStyleLayerIsValid();
 
-    auto propertyValue = self.rawLayer->getCircleColor() ?: self.rawLayer->getDefaultCircleColor();
-    return MGLStyleValueTransformer<mbgl::Color, MGLColor *>().toStyleValue(propertyValue);
+    auto propertyValue = self.rawLayer->getCircleColor();
+    if (propertyValue.isUndefined()) {
+        return MGLStyleValueTransformer<mbgl::Color, MGLColor *>().toDataDrivenStyleValue(self.rawLayer->getDefaultCircleColor());
+    }
+    return MGLStyleValueTransformer<mbgl::Color, MGLColor *>().toDataDrivenStyleValue(propertyValue);
 }
 
 - (void)setCircleOpacity:(MGLStyleValue<NSNumber *> *)circleOpacity {
     MGLAssertStyleLayerIsValid();
 
-    auto mbglValue = MGLStyleValueTransformer<float, NSNumber *>().toPropertyValue(circleOpacity);
+    auto mbglValue = MGLStyleValueTransformer<float, NSNumber *>().toDataDrivenPropertyValue(circleOpacity);
     self.rawLayer->setCircleOpacity(mbglValue);
 }
 
 - (MGLStyleValue<NSNumber *> *)circleOpacity {
     MGLAssertStyleLayerIsValid();
 
-    auto propertyValue = self.rawLayer->getCircleOpacity() ?: self.rawLayer->getDefaultCircleOpacity();
-    return MGLStyleValueTransformer<float, NSNumber *>().toStyleValue(propertyValue);
-}
-
-- (void)setCirclePitchScale:(MGLStyleValue<NSValue *> *)circlePitchScale {
-    MGLAssertStyleLayerIsValid();
-
-    auto mbglValue = MGLStyleValueTransformer<mbgl::style::CirclePitchScaleType, NSValue *, mbgl::style::CirclePitchScaleType, MGLCirclePitchScale>().toEnumPropertyValue(circlePitchScale);
-    self.rawLayer->setCirclePitchScale(mbglValue);
-}
-
-- (MGLStyleValue<NSValue *> *)circlePitchScale {
-    MGLAssertStyleLayerIsValid();
-
-    auto propertyValue = self.rawLayer->getCirclePitchScale() ?: self.rawLayer->getDefaultCirclePitchScale();
-    return MGLStyleValueTransformer<mbgl::style::CirclePitchScaleType, NSValue *, mbgl::style::CirclePitchScaleType, MGLCirclePitchScale>().toEnumStyleValue(propertyValue);
+    auto propertyValue = self.rawLayer->getCircleOpacity();
+    if (propertyValue.isUndefined()) {
+        return MGLStyleValueTransformer<float, NSNumber *>().toDataDrivenStyleValue(self.rawLayer->getDefaultCircleOpacity());
+    }
+    return MGLStyleValueTransformer<float, NSNumber *>().toDataDrivenStyleValue(propertyValue);
 }
 
 - (void)setCircleRadius:(MGLStyleValue<NSNumber *> *)circleRadius {
     MGLAssertStyleLayerIsValid();
 
-    auto mbglValue = MGLStyleValueTransformer<float, NSNumber *>().toPropertyValue(circleRadius);
+    auto mbglValue = MGLStyleValueTransformer<float, NSNumber *>().toDataDrivenPropertyValue(circleRadius);
     self.rawLayer->setCircleRadius(mbglValue);
 }
 
 - (MGLStyleValue<NSNumber *> *)circleRadius {
     MGLAssertStyleLayerIsValid();
 
-    auto propertyValue = self.rawLayer->getCircleRadius() ?: self.rawLayer->getDefaultCircleRadius();
-    return MGLStyleValueTransformer<float, NSNumber *>().toStyleValue(propertyValue);
+    auto propertyValue = self.rawLayer->getCircleRadius();
+    if (propertyValue.isUndefined()) {
+        return MGLStyleValueTransformer<float, NSNumber *>().toDataDrivenStyleValue(self.rawLayer->getDefaultCircleRadius());
+    }
+    return MGLStyleValueTransformer<float, NSNumber *>().toDataDrivenStyleValue(propertyValue);
 }
 
-- (void)setCircleTranslate:(MGLStyleValue<NSValue *> *)circleTranslate {
+- (void)setCircleScaleAlignment:(MGLStyleValue<NSValue *> *)circleScaleAlignment {
     MGLAssertStyleLayerIsValid();
 
-    auto mbglValue = MGLStyleValueTransformer<std::array<float, 2>, NSValue *>().toPropertyValue(circleTranslate);
+    auto mbglValue = MGLStyleValueTransformer<mbgl::style::CirclePitchScaleType, NSValue *, mbgl::style::CirclePitchScaleType, MGLCircleScaleAlignment>().toEnumPropertyValue(circleScaleAlignment);
+    self.rawLayer->setCirclePitchScale(mbglValue);
+}
+
+- (MGLStyleValue<NSValue *> *)circleScaleAlignment {
+    MGLAssertStyleLayerIsValid();
+
+    auto propertyValue = self.rawLayer->getCirclePitchScale();
+    if (propertyValue.isUndefined()) {
+        return MGLStyleValueTransformer<mbgl::style::CirclePitchScaleType, NSValue *, mbgl::style::CirclePitchScaleType, MGLCircleScaleAlignment>().toEnumStyleValue(self.rawLayer->getDefaultCirclePitchScale());
+    }
+    return MGLStyleValueTransformer<mbgl::style::CirclePitchScaleType, NSValue *, mbgl::style::CirclePitchScaleType, MGLCircleScaleAlignment>().toEnumStyleValue(propertyValue);
+}
+
+- (void)setCirclePitchScale:(MGLStyleValue<NSValue *> *)circlePitchScale {
+}
+
+- (MGLStyleValue<NSValue *> *)circlePitchScale {
+    return self.circleScaleAlignment;
+}
+
+- (void)setCircleStrokeColor:(MGLStyleValue<MGLColor *> *)circleStrokeColor {
+    MGLAssertStyleLayerIsValid();
+
+    auto mbglValue = MGLStyleValueTransformer<mbgl::Color, MGLColor *>().toDataDrivenPropertyValue(circleStrokeColor);
+    self.rawLayer->setCircleStrokeColor(mbglValue);
+}
+
+- (MGLStyleValue<MGLColor *> *)circleStrokeColor {
+    MGLAssertStyleLayerIsValid();
+
+    auto propertyValue = self.rawLayer->getCircleStrokeColor();
+    if (propertyValue.isUndefined()) {
+        return MGLStyleValueTransformer<mbgl::Color, MGLColor *>().toDataDrivenStyleValue(self.rawLayer->getDefaultCircleStrokeColor());
+    }
+    return MGLStyleValueTransformer<mbgl::Color, MGLColor *>().toDataDrivenStyleValue(propertyValue);
+}
+
+- (void)setCircleStrokeOpacity:(MGLStyleValue<NSNumber *> *)circleStrokeOpacity {
+    MGLAssertStyleLayerIsValid();
+
+    auto mbglValue = MGLStyleValueTransformer<float, NSNumber *>().toDataDrivenPropertyValue(circleStrokeOpacity);
+    self.rawLayer->setCircleStrokeOpacity(mbglValue);
+}
+
+- (MGLStyleValue<NSNumber *> *)circleStrokeOpacity {
+    MGLAssertStyleLayerIsValid();
+
+    auto propertyValue = self.rawLayer->getCircleStrokeOpacity();
+    if (propertyValue.isUndefined()) {
+        return MGLStyleValueTransformer<float, NSNumber *>().toDataDrivenStyleValue(self.rawLayer->getDefaultCircleStrokeOpacity());
+    }
+    return MGLStyleValueTransformer<float, NSNumber *>().toDataDrivenStyleValue(propertyValue);
+}
+
+- (void)setCircleStrokeWidth:(MGLStyleValue<NSNumber *> *)circleStrokeWidth {
+    MGLAssertStyleLayerIsValid();
+
+    auto mbglValue = MGLStyleValueTransformer<float, NSNumber *>().toDataDrivenPropertyValue(circleStrokeWidth);
+    self.rawLayer->setCircleStrokeWidth(mbglValue);
+}
+
+- (MGLStyleValue<NSNumber *> *)circleStrokeWidth {
+    MGLAssertStyleLayerIsValid();
+
+    auto propertyValue = self.rawLayer->getCircleStrokeWidth();
+    if (propertyValue.isUndefined()) {
+        return MGLStyleValueTransformer<float, NSNumber *>().toDataDrivenStyleValue(self.rawLayer->getDefaultCircleStrokeWidth());
+    }
+    return MGLStyleValueTransformer<float, NSNumber *>().toDataDrivenStyleValue(propertyValue);
+}
+
+- (void)setCircleTranslation:(MGLStyleValue<NSValue *> *)circleTranslation {
+    MGLAssertStyleLayerIsValid();
+
+    auto mbglValue = MGLStyleValueTransformer<std::array<float, 2>, NSValue *>().toInterpolatablePropertyValue(circleTranslation);
     self.rawLayer->setCircleTranslate(mbglValue);
 }
 
-- (MGLStyleValue<NSValue *> *)circleTranslate {
+- (MGLStyleValue<NSValue *> *)circleTranslation {
     MGLAssertStyleLayerIsValid();
 
-    auto propertyValue = self.rawLayer->getCircleTranslate() ?: self.rawLayer->getDefaultCircleTranslate();
+    auto propertyValue = self.rawLayer->getCircleTranslate();
+    if (propertyValue.isUndefined()) {
+        return MGLStyleValueTransformer<std::array<float, 2>, NSValue *>().toStyleValue(self.rawLayer->getDefaultCircleTranslate());
+    }
     return MGLStyleValueTransformer<std::array<float, 2>, NSValue *>().toStyleValue(propertyValue);
 }
 
-- (void)setCircleTranslateAnchor:(MGLStyleValue<NSValue *> *)circleTranslateAnchor {
+- (void)setCircleTranslate:(MGLStyleValue<NSValue *> *)circleTranslate {
+}
+
+- (MGLStyleValue<NSValue *> *)circleTranslate {
+    return self.circleTranslation;
+}
+
+- (void)setCircleTranslationAnchor:(MGLStyleValue<NSValue *> *)circleTranslationAnchor {
     MGLAssertStyleLayerIsValid();
 
-    auto mbglValue = MGLStyleValueTransformer<mbgl::style::TranslateAnchorType, NSValue *, mbgl::style::TranslateAnchorType, MGLCircleTranslateAnchor>().toEnumPropertyValue(circleTranslateAnchor);
+    auto mbglValue = MGLStyleValueTransformer<mbgl::style::TranslateAnchorType, NSValue *, mbgl::style::TranslateAnchorType, MGLCircleTranslationAnchor>().toEnumPropertyValue(circleTranslationAnchor);
     self.rawLayer->setCircleTranslateAnchor(mbglValue);
 }
 
-- (MGLStyleValue<NSValue *> *)circleTranslateAnchor {
+- (MGLStyleValue<NSValue *> *)circleTranslationAnchor {
     MGLAssertStyleLayerIsValid();
 
-    auto propertyValue = self.rawLayer->getCircleTranslateAnchor() ?: self.rawLayer->getDefaultCircleTranslateAnchor();
-    return MGLStyleValueTransformer<mbgl::style::TranslateAnchorType, NSValue *, mbgl::style::TranslateAnchorType, MGLCircleTranslateAnchor>().toEnumStyleValue(propertyValue);
+    auto propertyValue = self.rawLayer->getCircleTranslateAnchor();
+    if (propertyValue.isUndefined()) {
+        return MGLStyleValueTransformer<mbgl::style::TranslateAnchorType, NSValue *, mbgl::style::TranslateAnchorType, MGLCircleTranslationAnchor>().toEnumStyleValue(self.rawLayer->getDefaultCircleTranslateAnchor());
+    }
+    return MGLStyleValueTransformer<mbgl::style::TranslateAnchorType, NSValue *, mbgl::style::TranslateAnchorType, MGLCircleTranslationAnchor>().toEnumStyleValue(propertyValue);
 }
 
+- (void)setCircleTranslateAnchor:(MGLStyleValue<NSValue *> *)circleTranslateAnchor {
+}
+
+- (MGLStyleValue<NSValue *> *)circleTranslateAnchor {
+    return self.circleTranslationAnchor;
+}
+
+
+@end
+
+@implementation NSValue (MGLCircleStyleLayerAdditions)
+
++ (NSValue *)valueWithMGLCircleScaleAlignment:(MGLCircleScaleAlignment)circleScaleAlignment {
+    return [NSValue value:&circleScaleAlignment withObjCType:@encode(MGLCircleScaleAlignment)];
+}
+
+- (MGLCircleScaleAlignment)MGLCircleScaleAlignmentValue {
+    MGLCircleScaleAlignment circleScaleAlignment;
+    [self getValue:&circleScaleAlignment];
+    return circleScaleAlignment;
+}
+
++ (NSValue *)valueWithMGLCircleTranslationAnchor:(MGLCircleTranslationAnchor)circleTranslationAnchor {
+    return [NSValue value:&circleTranslationAnchor withObjCType:@encode(MGLCircleTranslationAnchor)];
+}
+
+- (MGLCircleTranslationAnchor)MGLCircleTranslationAnchorValue {
+    MGLCircleTranslationAnchor circleTranslationAnchor;
+    [self getValue:&circleTranslationAnchor];
+    return circleTranslationAnchor;
+}
 
 @end

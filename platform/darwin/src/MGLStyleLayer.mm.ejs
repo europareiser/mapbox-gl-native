@@ -2,10 +2,10 @@
   const type = locals.type;
   const layoutProperties = locals.layoutProperties;
   const paintProperties = locals.paintProperties;
-  const containsEnumerationProperties = locals.containsEnumerationProperties;
+  const enumProperties = locals.enumProperties;
 -%>
-// This file is generated. 
-// Edit platform/darwin/scripts/generate-style-code.js, then run `make style-code-darwin`.
+// This file is generated.
+// Edit platform/darwin/scripts/generate-style-code.js, then run `make darwin-style-code`.
 
 #import "MGLSource.h"
 #import "MGLMapView_Private.h"
@@ -14,8 +14,10 @@
 #import "MGLStyleValue_Private.h"
 #import "MGL<%- camelize(type) %>StyleLayer.h"
 
-#include <mbgl/style/layers/<%- type %>_layer.hpp>
-<% if (containsEnumerationProperties)  { -%>
+#include <mbgl/map/map.hpp>
+#include <mbgl/style/layers/<%- type.replace('-', '_') %>_layer.hpp>
+<% if (enumProperties) { -%>
+
 namespace mbgl {
 
 <% if (layoutProperties.length) { -%>
@@ -89,7 +91,15 @@ namespace mbgl {
     super.rawLayer = rawLayer;
 }
 
-<% if (type !== 'background' && type !== 'raster') { -%>
+<% if (type !== 'background') { -%>
+- (NSString *)sourceIdentifier
+{
+    MGLAssertStyleLayerIsValid();
+
+    return @(self.rawLayer->getSourceID().c_str());
+}
+
+<% if (type !== 'raster') { -%>
 - (NSString *)sourceLayerIdentifier
 {
     MGLAssertStyleLayerIsValid();
@@ -109,7 +119,7 @@ namespace mbgl {
 {
     MGLAssertStyleLayerIsValid();
 
-    self.rawLayer->setFilter(predicate.mgl_filter);
+    self.rawLayer->setFilter(predicate ? predicate.mgl_filter : mbgl::style::NullFilter());
 }
 
 - (NSPredicate *)predicate
@@ -119,7 +129,7 @@ namespace mbgl {
     return [NSPredicate mgl_predicateWithFilter:self.rawLayer->getFilter()];
 }
 
-<% } -%>
+<% }} -%>
 #pragma mark - Adding to and removing from a map view
 
 - (void)addToMapView:(MGLMapView *)mapView belowLayer:(MGLStyleLayer *)otherLayer
@@ -166,29 +176,46 @@ namespace mbgl {
 - (void)set<%- camelize(property.name) %>:(MGLStyleValue<<%- propertyType(property, true) %>> *)<%- objCName(property) %> {
     MGLAssertStyleLayerIsValid();
 
-<% if (property.type == "enum") { -%>
-    auto mbglValue = MGLStyleValueTransformer<mbgl::style::<%- mbglType(property) %>, NSValue *, mbgl::style::<%- mbglType(property) %>, MGL<%- camelize(property.name) %>>().toEnumPropertyValue(<%- objCName(property) %>);
-    self.rawLayer->set<%- camelize(originalPropertyName(property)) %>(mbglValue);
+<% if (property["property-function"]) { -%>
+    auto mbglValue = MGLStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toDataDrivenPropertyValue(<%- objCName(property) %>);
 <% } else { -%>
+<% if (property.type == "enum") { -%>
+    auto mbglValue = MGLStyleValueTransformer<<%- mbglType(property) %>, NSValue *, <%- mbglType(property) %>, MGL<%- camelize(property.name) %>>().toEnumPropertyValue(<%- objCName(property) %>);
+<% } else if (property.function == "piecewise-constant") { -%>
     auto mbglValue = MGLStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toPropertyValue(<%- objCName(property) %>);
-    self.rawLayer->set<%- camelize(originalPropertyName(property)) %>(mbglValue);
+<% } else { -%>
+    auto mbglValue = MGLStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toInterpolatablePropertyValue(<%- objCName(property) %>);
 <% } -%>
+<% } -%>
+    self.rawLayer->set<%- camelize(originalPropertyName(property)) %>(mbglValue);
 }
 
 - (MGLStyleValue<<%- propertyType(property, true) %>> *)<%- objCGetter(property) %> {
     MGLAssertStyleLayerIsValid();
 
-    auto propertyValue = self.rawLayer->get<%- camelize(originalPropertyName(property)) %>() ?: self.rawLayer->getDefault<%- camelize(originalPropertyName(property)) %>();
-<% if (property.type == "enum") { -%>
-    return MGLStyleValueTransformer<mbgl::style::<%- mbglType(property) %>, NSValue *, mbgl::style::<%- mbglType(property) %>, MGL<%- camelize(property.name) %>>().toEnumStyleValue(propertyValue);
+    auto propertyValue = self.rawLayer->get<%- camelize(originalPropertyName(property)) %>();
+<% if (property["property-function"]) { -%>
+    if (propertyValue.isUndefined()) {
+        return MGLStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toDataDrivenStyleValue(self.rawLayer->getDefault<%- camelize(originalPropertyName(property)) %>());
+    }
+    return MGLStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toDataDrivenStyleValue(propertyValue);
 <% } else { -%>
+<% if (property.type == "enum") { -%>
+    if (propertyValue.isUndefined()) {
+        return MGLStyleValueTransformer<<%- mbglType(property) %>, NSValue *, <%- mbglType(property) %>, MGL<%- camelize(property.name) %>>().toEnumStyleValue(self.rawLayer->getDefault<%- camelize(originalPropertyName(property)) %>());
+    }
+    return MGLStyleValueTransformer<<%- mbglType(property) %>, NSValue *, <%- mbglType(property) %>, MGL<%- camelize(property.name) %>>().toEnumStyleValue(propertyValue);
+<% } else { -%>
+    if (propertyValue.isUndefined()) {
+        return MGLStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toStyleValue(self.rawLayer->getDefault<%- camelize(originalPropertyName(property)) %>());
+    }
     return MGLStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toStyleValue(propertyValue);
+<% } -%>
 <% } -%>
 }
 
-<% if (property.original) { %>
+<% if (property.original) { -%>
 - (void)set<%- camelize(originalPropertyName(property)) %>:(MGLStyleValue<<%- propertyType(property, true) %>> *)<%- camelizeWithLeadingLowercase(originalPropertyName(property)) %> {
-    self.<%- camelizeWithLeadingLowercase(property.name) %> = <%- camelizeWithLeadingLowercase(originalPropertyName(property)) %>;
 }
 
 - (MGLStyleValue<<%- propertyType(property, true) %>> *)<%- camelizeWithLeadingLowercase(originalPropertyName(property)) %> {
@@ -205,29 +232,50 @@ namespace mbgl {
 - (void)set<%- camelize(property.name) %>:(MGLStyleValue<<%- propertyType(property, true) %>> *)<%- objCName(property) %> {
     MGLAssertStyleLayerIsValid();
 
-<% if (property.type == "enum") { -%>
-    auto mbglValue = MGLStyleValueTransformer<mbgl::style::<%- mbglType(property) %>, NSValue *, mbgl::style::<%- mbglType(property) %>, MGL<%- camelize(property.name) %>>().toEnumPropertyValue(<%- objCName(property) %>);
-    self.rawLayer->set<%- camelize(originalPropertyName(property)) %>(mbglValue);
+<% if (property["property-function"]) { -%>
+    auto mbglValue = MGLStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toDataDrivenPropertyValue(<%- objCName(property) %>);
 <% } else { -%>
+<% if (property.type == "enum") { -%>
+    auto mbglValue = MGLStyleValueTransformer<<%- mbglType(property) %>, NSValue *, <%- mbglType(property) %>, MGL<%- camelize(property.name) %>>().toEnumPropertyValue(<%- objCName(property) %>);
+<% } else if (property.function == "piecewise-constant") { -%>
     auto mbglValue = MGLStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toPropertyValue(<%- objCName(property) %>);
-    self.rawLayer->set<%- camelize(originalPropertyName(property)) %>(mbglValue);
+<% } else { -%>
+    auto mbglValue = MGLStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toInterpolatablePropertyValue(<%- objCName(property) %>);
 <% } -%>
+<% } -%>
+    self.rawLayer->set<%- camelize(originalPropertyName(property)) %>(mbglValue);
 }
 
 - (MGLStyleValue<<%- propertyType(property, true) %>> *)<%- objCGetter(property) %> {
     MGLAssertStyleLayerIsValid();
 
-    auto propertyValue = self.rawLayer->get<%- camelize(originalPropertyName(property)) %>() ?: self.rawLayer->getDefault<%- camelize(originalPropertyName(property)) %>();
-<% if (property.type == "enum") { -%>
-    return MGLStyleValueTransformer<mbgl::style::<%- mbglType(property) %>, NSValue *, mbgl::style::<%- mbglType(property) %>, MGL<%- camelize(property.name) %>>().toEnumStyleValue(propertyValue);
+    auto propertyValue = self.rawLayer->get<%- camelize(originalPropertyName(property)) %>();
+<% if (property["property-function"]) { -%>
+    if (propertyValue.isUndefined()) {
+        return MGLStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toDataDrivenStyleValue(self.rawLayer->getDefault<%- camelize(originalPropertyName(property)) %>());
+    }
+    return MGLStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toDataDrivenStyleValue(propertyValue);
 <% } else { -%>
+<% if (property.type == "enum") { -%>
+    if (propertyValue.isUndefined()) {
+        return MGLStyleValueTransformer<<%- mbglType(property) %>, NSValue *, <%- mbglType(property) %>, MGL<%- camelize(property.name) %>>().toEnumStyleValue(self.rawLayer->getDefault<%- camelize(originalPropertyName(property)) %>());
+    }
+    return MGLStyleValueTransformer<<%- mbglType(property) %>, NSValue *, <%- mbglType(property) %>, MGL<%- camelize(property.name) %>>().toEnumStyleValue(propertyValue);
+<% } else { -%>
+    if (propertyValue.isUndefined()) {
+        return MGLStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toStyleValue(self.rawLayer->getDefault<%- camelize(originalPropertyName(property)) %>());
+    }
     return MGLStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toStyleValue(propertyValue);
+<% } -%>
 <% } -%>
 }
 
-<% if (property.original) { %>
+<% if (property.original) { -%>
 - (void)set<%- camelize(originalPropertyName(property)) %>:(MGLStyleValue<<%- propertyType(property, true) %>> *)<%- camelizeWithLeadingLowercase(originalPropertyName(property)) %> {
-    NSAssert(NO, @"Use -set<%- camelize(property.name) %>: instead.");
+}
+
+- (MGLStyleValue<<%- propertyType(property, true) %>> *)<%- camelizeWithLeadingLowercase(originalPropertyName(property)) %> {
+    return self.<%- objCGetter(property) %>;
 }
 
 <% } -%>
@@ -235,3 +283,21 @@ namespace mbgl {
 <% } -%>
 
 @end
+<% if (enumProperties) { -%>
+
+@implementation NSValue (MGL<%- camelize(type) %>StyleLayerAdditions)
+
+<% for (let property of enumProperties) { -%>
++ (NSValue *)valueWithMGL<%- camelize(property.name) %>:(MGL<%- camelize(property.name) %>)<%- objCName(property) %> {
+    return [NSValue value:&<%- objCName(property) %> withObjCType:@encode(MGL<%- camelize(property.name) %>)];
+}
+
+- (MGL<%- camelize(property.name) %>)MGL<%- camelize(property.name) %>Value {
+    MGL<%- camelize(property.name) %> <%- objCName(property) %>;
+    [self getValue:&<%- objCName(property) %>];
+    return <%- objCName(property) %>;
+}
+
+<% } -%>
+@end
+<% } -%>

@@ -1,16 +1,23 @@
-# Integrating the Mapbox macOS SDK into your application
+# Integrating a custom build of the Mapbox macOS SDK into your application
 
-This document explains how to build the Mapbox macOS SDK and integrate it into your own Cocoa application.
+This document explains how to build a development version of the Mapbox macOS SDK from source and integrate it into your own Cocoa application. This process is for advanced developers who want to get a glimpse of the SDK’s development between releases. To use a production-ready version of the SDK, see the [Mapbox macOS SDK homepage](https://mapbox.github.io/mapbox-gl-native/macos/).
 
 ### Requirements
 
 The Mapbox macOS SDK requires the macOS 10.10.0 SDK (or above) and Xcode 7.3 (or above).
 
-### Building the SDK
+### Building the SDK from source
 
-Grab a [prebuilt release](https://github.com/mapbox/mapbox-gl-native/releases/) – look for the releases that begin with “macos-” – or build the SDK from source:
+To build the SDK from source:
 
 1. [Install core dependencies](../../INSTALL.md).
+
+1. Install [jazzy](https://github.com/realm/jazzy) for generating API documentation:
+
+   ```
+   [sudo] gem install jazzy
+   ```
+
 1. Run `make xpackage`, which produces a `Mapbox.framework` in the `build/macos/pkg/` folder.
 
 ### Installation
@@ -64,4 +71,4 @@ script AppDelegate
 end script
 ```
 
-Run `make xdocument` to generate complete API documentation. The [Mapbox iOS SDK](https://www.mapbox.com/ios-sdk/)’s [API documentation](https://www.mapbox.com/ios-sdk/api/) and [online examples](https://www.mapbox.com/ios-sdk/examples/) apply to the Mapbox macOS SDK with few differences, mostly around unimplemented features like user location tracking.
+For further instructions, consult the [macOS SDK documentation](https://mapbox.github.io/mapbox-gl-native/macos/) or run `make xdocument` to generate the documentation. The [Mapbox iOS SDK](https://www.mapbox.com/ios-sdk/)’s [API documentation](https://www.mapbox.com/ios-sdk/) and [online examples](https://www.mapbox.com/ios-sdk/examples/) apply to the Mapbox macOS SDK with few differences, mostly around unimplemented features like user location tracking.

@@ -1,6 +1,7 @@
-// This file is generated. 
+// This file is generated.
 // Edit platform/darwin/scripts/generate-style-code.js, then run `make style-code-darwin`.
 
+#import "MGLFoundation.h"
 #import "MGLStyleValue.h"
 #import "MGLVectorStyleLayer.h"
 
@@ -9,7 +10,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  In combination with `symbolPlacement`, determines the rotation behavior of
  icons.
- 
+
  Values of this type are used in the `MGLSymbolStyleLayer.iconRotationAlignment`
  property.
  */
@@ -36,7 +37,7 @@ typedef NS_ENUM(NSUInteger, MGLIconRotationAlignment) {
 
 /**
  Scales the icon to fit around the associated text.
- 
+
  Values of this type are used in the `MGLSymbolStyleLayer.iconTextFit`
  property.
  */
@@ -61,7 +62,7 @@ typedef NS_ENUM(NSUInteger, MGLIconTextFit) {
 
 /**
  Label placement relative to its geometry.
- 
+
  Values of this type are used in the `MGLSymbolStyleLayer.symbolPlacement`
  property.
  */
@@ -79,7 +80,7 @@ typedef NS_ENUM(NSUInteger, MGLSymbolPlacement) {
 
 /**
  Part of the text placed closest to the anchor.
- 
+
  Values of this type are used in the `MGLSymbolStyleLayer.textAnchor`
  property.
  */
@@ -124,7 +125,7 @@ typedef NS_ENUM(NSUInteger, MGLTextAnchor) {
 
 /**
  Text justification options.
- 
+
  Values of this type are used in the `MGLSymbolStyleLayer.textJustification`
  property.
  */
@@ -145,7 +146,7 @@ typedef NS_ENUM(NSUInteger, MGLTextJustification) {
 
 /**
  Orientation of text when map is pitched.
- 
+
  Values of this type are used in the `MGLSymbolStyleLayer.textPitchAlignment`
  property.
  */
@@ -167,7 +168,7 @@ typedef NS_ENUM(NSUInteger, MGLTextPitchAlignment) {
 /**
  In combination with `symbolPlacement`, determines the rotation behavior of the
  individual glyphs forming the text.
- 
+
  Values of this type are used in the `MGLSymbolStyleLayer.textRotationAlignment`
  property.
  */
@@ -194,7 +195,7 @@ typedef NS_ENUM(NSUInteger, MGLTextRotationAlignment) {
 
 /**
  Specifies how to capitalize text.
- 
+
  Values of this type are used in the `MGLSymbolStyleLayer.textTransform`
  property.
  */
@@ -215,36 +216,36 @@ typedef NS_ENUM(NSUInteger, MGLTextTransform) {
 
 /**
  Controls the translation reference point.
- 
- Values of this type are used in the `MGLSymbolStyleLayer.iconTranslateAnchor`
+
+ Values of this type are used in the `MGLSymbolStyleLayer.iconTranslationAnchor`
  property.
  */
-typedef NS_ENUM(NSUInteger, MGLIconTranslateAnchor) {
+typedef NS_ENUM(NSUInteger, MGLIconTranslationAnchor) {
     /**
      Icons are translated relative to the map.
      */
-    MGLIconTranslateAnchorMap,
+    MGLIconTranslationAnchorMap,
     /**
      Icons are translated relative to the viewport.
      */
-    MGLIconTranslateAnchorViewport,
+    MGLIconTranslationAnchorViewport,
 };
 
 /**
  Controls the translation reference point.
- 
- Values of this type are used in the `MGLSymbolStyleLayer.textTranslateAnchor`
+
+ Values of this type are used in the `MGLSymbolStyleLayer.textTranslationAnchor`
  property.
  */
-typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
+typedef NS_ENUM(NSUInteger, MGLTextTranslationAnchor) {
     /**
      The text is translated relative to the map.
      */
-    MGLTextTranslateAnchorMap,
+    MGLTextTranslationAnchorMap,
     /**
      The text is translated relative to the viewport.
      */
-    MGLTextTranslateAnchorViewport,
+    MGLTextTranslationAnchorViewport,
 };
 
 /**
@@ -254,15 +255,29 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  Use a symbol style layer to configure the visual appearance of labels for
  features in vector tiles loaded by an `MGLVectorSource` object or `MGLShape` or
  `MGLFeature` instances in an `MGLShapeSource` object.
- 
+
  You can access an existing symbol style layer using the
  `-[MGLStyle layerWithIdentifier:]` method if you know its identifier;
  otherwise, find it using the `MGLStyle.layers` property. You can also create a
  new symbol style layer and add it to the style using a method such as
  `-[MGLStyle addLayer:]`.
 
- <!--EXAMPLE: MGLSymbolStyleLayer-->
+ ### Example
+
+ ```swift
+ let layer = MGLSymbolStyleLayer(identifier: "coffeeshops", source: pois)
+ layer.sourceLayerIdentifier = "pois"
+ layer.iconImageName = MGLStyleValue(rawValue: "coffee")
+ layer.iconScale = MGLStyleValue(rawValue: 0.5)
+ layer.text = MGLStyleValue(rawValue: "{name}")
+ layer.textTranslation = MGLStyleValue(rawValue: NSValue(cgVector: CGVector(dx: 10, dy: 0)))
+ layer.textJustification = MGLStyleValue(rawValue: NSValue(mglTextJustification: .left))
+ layer.textAnchor = MGLStyleValue(rawValue: NSValue(mglTextAnchor: .left))
+ layer.predicate = NSPredicate(format: "%K == %@", "venue-type", "coffee")
+ mapView.style?.addLayer(layer)
+ ```
  */
+MGL_EXPORT
 @interface MGLSymbolStyleLayer : MGLVectorStyleLayer
 
 #pragma mark - Accessing the Layout Attributes
@@ -281,6 +296,12 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  This attribute corresponds to the <a
  href="https://www.mapbox.com/mapbox-gl-style-spec/#layout-symbol-icon-allow-overlap"><code>icon-allow-overlap</code></a>
  layout property in the Mapbox Style Specification.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of
+ `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *iconAllowsOverlap;
 
@@ -300,6 +321,12 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  This attribute corresponds to the <a
  href="https://www.mapbox.com/mapbox-gl-style-spec/#layout-symbol-icon-ignore-placement"><code>icon-ignore-placement</code></a>
  layout property in the Mapbox Style Specification.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of
+ `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *iconIgnoresPlacement;
 
@@ -312,23 +339,75 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  This attribute corresponds to the <a
  href="https://www.mapbox.com/mapbox-gl-style-spec/#layout-symbol-icon-image"><code>icon-image</code></a>
  layout property in the Mapbox Style Specification.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of
+ `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSString *> *iconImageName;
 
 
 @property (nonatomic, null_resettable) MGLStyleValue<NSString *> *iconImage __attribute__((unavailable("Use iconImageName instead.")));
 
+#if TARGET_OS_IPHONE
 /**
  Offset distance of icon from its anchor.
  
  The default value of this property is an `MGLStyleValue` object containing an
- `NSValue` object containing a `CGVector` struct set to 0 from the left and 0
- from the top. Set this property to `nil` to reset it to the default value.
+ `NSValue` object containing a `CGVector` struct set to 0 rightward and 0
+ downward. Set this property to `nil` to reset it to the default value.
  
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
+ * `MGLSourceStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
+   * `MGLInterpolationModeCategorical`
+   * `MGLInterpolationModeIdentity`
+ * `MGLCompositeStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
+   * `MGLInterpolationModeCategorical`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *iconOffset;
+#else
+/**
+ Offset distance of icon from its anchor.
+ 
+ The default value of this property is an `MGLStyleValue` object containing an
+ `NSValue` object containing a `CGVector` struct set to 0 rightward and 0
+ upward. Set this property to `nil` to reset it to the default value.
+ 
+ This property is only applied to the style if `iconImageName` is non-`nil`.
+ Otherwise, it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
+ * `MGLSourceStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
+   * `MGLInterpolationModeCategorical`
+   * `MGLInterpolationModeIdentity`
+ * `MGLCompositeStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
+   * `MGLInterpolationModeCategorical`
+ */
+@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *iconOffset;
+#endif
 
 /**
  If true, text will display without their corresponding icons when the icon
@@ -339,7 +418,13 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  the default value.
  
  This property is only applied to the style if `iconImageName` is non-`nil`, and
- `textField` is non-`nil`. Otherwise, it is ignored.
+ `text` is non-`nil`. Otherwise, it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of
+ `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable, getter=isIconOptional) MGLStyleValue<NSNumber *> *iconOptional;
 
@@ -355,6 +440,13 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *iconPadding;
 
@@ -373,6 +465,22 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  This attribute corresponds to the <a
  href="https://www.mapbox.com/mapbox-gl-style-spec/#layout-symbol-icon-rotate"><code>icon-rotate</code></a>
  layout property in the Mapbox Style Specification.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
+ * `MGLSourceStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
+   * `MGLInterpolationModeCategorical`
+   * `MGLInterpolationModeIdentity`
+ * `MGLCompositeStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
+   * `MGLInterpolationModeCategorical`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *iconRotation;
 
@@ -389,6 +497,12 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of
+ `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *iconRotationAlignment;
 
@@ -405,6 +519,13 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  This attribute corresponds to the <a
  href="https://www.mapbox.com/mapbox-gl-style-spec/#layout-symbol-icon-size"><code>icon-size</code></a>
  layout property in the Mapbox Style Specification.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *iconScale;
 
@@ -419,25 +540,63 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  reset it to the default value.
  
  This property is only applied to the style if `iconImageName` is non-`nil`, and
- `textField` is non-`nil`. Otherwise, it is ignored.
+ `text` is non-`nil`. Otherwise, it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of
+ `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *iconTextFit;
 
+#if TARGET_OS_IPHONE
 /**
  Size of the additional area added to dimensions determined by `iconTextFit`.
  
  This property is measured in points.
  
  The default value of this property is an `MGLStyleValue` object containing an
- `NSValue` object containing `NSEdgeInsetsZero` or `UIEdgeInsetsZero`. Set this
- property to `nil` to reset it to the default value.
+ `NSValue` object containing `UIEdgeInsetsZero`. Set this property to `nil` to
+ reset it to the default value.
  
  This property is only applied to the style if `iconImageName` is non-`nil`, and
- `textField` is non-`nil`, and `iconTextFit` is set to an `MGLStyleValue` object
+ `text` is non-`nil`, and `iconTextFit` is set to an `MGLStyleValue` object
  containing an `NSValue` object containing `MGLIconTextFitBoth`,
  `MGLIconTextFitWidth`, or `MGLIconTextFitHeight`. Otherwise, it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *iconTextFitPadding;
+#else
+/**
+ Size of the additional area added to dimensions determined by `iconTextFit`.
+ 
+ This property is measured in points.
+ 
+ The default value of this property is an `MGLStyleValue` object containing an
+ `NSValue` object containing `NSEdgeInsetsZero`. Set this property to `nil` to
+ reset it to the default value.
+ 
+ This property is only applied to the style if `iconImageName` is non-`nil`, and
+ `text` is non-`nil`, and `iconTextFit` is set to an `MGLStyleValue` object
+ containing an `NSValue` object containing `MGLIconTextFitBoth`,
+ `MGLIconTextFitWidth`, or `MGLIconTextFitHeight`. Otherwise, it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
+ */
+@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *iconTextFitPadding;
+#endif
 
 /**
  If true, the icon may be flipped to prevent it from being rendered upside-down.
@@ -455,6 +614,12 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  This attribute corresponds to the <a
  href="https://www.mapbox.com/mapbox-gl-style-spec/#layout-symbol-icon-keep-upright"><code>icon-keep-upright</code></a>
  layout property in the Mapbox Style Specification.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of
+ `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *keepsIconUpright;
 
@@ -469,7 +634,7 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  `NSNumber` object containing `YES`. Set this property to `nil` to reset it to
  the default value.
  
- This property is only applied to the style if `textField` is non-`nil`, and
+ This property is only applied to the style if `text` is non-`nil`, and
  `textRotationAlignment` is set to an `MGLStyleValue` object containing an
  `NSValue` object containing `MGLTextRotationAlignmentMap`, and
  `symbolPlacement` is set to an `MGLStyleValue` object containing an `NSValue`
@@ -478,6 +643,12 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  This attribute corresponds to the <a
  href="https://www.mapbox.com/mapbox-gl-style-spec/#layout-symbol-text-keep-upright"><code>text-keep-upright</code></a>
  layout property in the Mapbox Style Specification.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of
+ `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *keepsTextUpright;
 
@@ -493,13 +664,20 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  `NSNumber` object containing the float `45`. Set this property to `nil` to
  reset it to the default value.
  
- This property is only applied to the style if `textField` is non-`nil`, and
+ This property is only applied to the style if `text` is non-`nil`, and
  `symbolPlacement` is set to an `MGLStyleValue` object containing an `NSValue`
  object containing `MGLSymbolPlacementLine`. Otherwise, it is ignored.
  
  This attribute corresponds to the <a
  href="https://www.mapbox.com/mapbox-gl-style-spec/#layout-symbol-text-max-angle"><code>text-max-angle</code></a>
  layout property in the Mapbox Style Specification.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *maximumTextAngle;
 
@@ -515,12 +693,19 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  `NSNumber` object containing the float `10`. Set this property to `nil` to
  reset it to the default value.
  
- This property is only applied to the style if `textField` is non-`nil`.
- Otherwise, it is ignored.
+ This property is only applied to the style if `text` is non-`nil`. Otherwise,
+ it is ignored.
  
  This attribute corresponds to the <a
  href="https://www.mapbox.com/mapbox-gl-style-spec/#layout-symbol-text-max-width"><code>text-max-width</code></a>
  layout property in the Mapbox Style Specification.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *maximumTextWidth;
 
@@ -540,6 +725,12 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  This attribute corresponds to the <a
  href="https://www.mapbox.com/mapbox-gl-style-spec/#layout-symbol-symbol-avoid-edges"><code>symbol-avoid-edges</code></a>
  layout property in the Mapbox Style Specification.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of
+ `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *symbolAvoidsEdges;
 
@@ -552,6 +743,12 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  The default value of this property is an `MGLStyleValue` object containing an
  `NSValue` object containing `MGLSymbolPlacementPoint`. Set this property to
  `nil` to reset it to the default value.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of
+ `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *symbolPlacement;
 
@@ -567,8 +764,37 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  This property is only applied to the style if `symbolPlacement` is set to an
  `MGLStyleValue` object containing an `NSValue` object containing
  `MGLSymbolPlacementLine`. Otherwise, it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *symbolSpacing;
+
+/**
+ Value to use for a text label. Feature properties are specified using tokens
+ like {field_name}.
+ 
+ The default value of this property is an `MGLStyleValue` object containing the
+ empty string. Set this property to `nil` to reset it to the default value.
+ 
+ This attribute corresponds to the <a
+ href="https://www.mapbox.com/mapbox-gl-style-spec/#layout-symbol-text-field"><code>text-field</code></a>
+ layout property in the Mapbox Style Specification.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of
+ `MGLInterpolationModeInterval`
+ */
+@property (nonatomic, null_resettable) MGLStyleValue<NSString *> *text;
+
+
+@property (nonatomic, null_resettable) MGLStyleValue<NSString *> *textField __attribute__((unavailable("Use text instead.")));
 
 /**
  If true, the text will be visible even if it collides with other previously
@@ -578,12 +804,18 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  `NSNumber` object containing `NO`. Set this property to `nil` to reset it to
  the default value.
  
- This property is only applied to the style if `textField` is non-`nil`.
- Otherwise, it is ignored.
+ This property is only applied to the style if `text` is non-`nil`. Otherwise,
+ it is ignored.
  
  This attribute corresponds to the <a
  href="https://www.mapbox.com/mapbox-gl-style-spec/#layout-symbol-text-allow-overlap"><code>text-allow-overlap</code></a>
  layout property in the Mapbox Style Specification.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of
+ `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *textAllowsOverlap;
 
@@ -597,31 +829,79 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  `NSValue` object containing `MGLTextAnchorCenter`. Set this property to `nil`
  to reset it to the default value.
  
- This property is only applied to the style if `textField` is non-`nil`.
- Otherwise, it is ignored.
+ This property is only applied to the style if `text` is non-`nil`. Otherwise,
+ it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of
+ `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *textAnchor;
 
 /**
- Value to use for a text label. Feature properties are specified using tokens
- like {field_name}.
+ An array of font face names used to display the text.
  
- The default value of this property is an `MGLStyleValue` object containing the
- empty string. Set this property to `nil` to reset it to the default value.
- */
-@property (nonatomic, null_resettable) MGLStyleValue<NSString *> *textField;
-
-/**
- Font stack to use for displaying text.
+ Each font name must be included in the `{fontstack}` portion of the JSON
+ stylesheet’s <a
+ href="https://www.mapbox.com/mapbox-gl-style-spec/#glyphs"><code>glyphs</code></a>
+ property. You can register a custom font when designing the style in Mapbox
+ Studio. Fonts installed on the system are not used.
+ 
+ The first font named in the array is applied to the text. For each character in
+ the text, if the first font lacks a glyph for the character, the next font is
+ applied as a fallback, and so on.
  
  The default value of this property is an `MGLStyleValue` object containing the
  array `Open Sans Regular`, `Arial Unicode MS Regular`. Set this property to
  `nil` to reset it to the default value.
  
- This property is only applied to the style if `textField` is non-`nil`.
- Otherwise, it is ignored.
+ This property is only applied to the style if `text` is non-`nil`. Otherwise,
+ it is ignored.
+ 
+ This attribute corresponds to the <a
+ href="https://www.mapbox.com/mapbox-gl-style-spec/#layout-symbol-text-font"><code>text-font</code></a>
+ layout property in the Mapbox Style Specification.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of
+ `MGLInterpolationModeInterval`
  */
-@property (nonatomic, null_resettable) MGLStyleValue<NSArray<NSString *> *> *textFont;
+@property (nonatomic, null_resettable) MGLStyleValue<NSArray<NSString *> *> *textFontNames;
+
+
+@property (nonatomic, null_resettable) MGLStyleValue<NSArray<NSString *> *> *textFont __attribute__((unavailable("Use textFontNames instead.")));
+
+/**
+ Font size.
+ 
+ This property is measured in points.
+ 
+ The default value of this property is an `MGLStyleValue` object containing an
+ `NSNumber` object containing the float `16`. Set this property to `nil` to
+ reset it to the default value.
+ 
+ This property is only applied to the style if `text` is non-`nil`. Otherwise,
+ it is ignored.
+ 
+ This attribute corresponds to the <a
+ href="https://www.mapbox.com/mapbox-gl-style-spec/#layout-symbol-text-size"><code>text-size</code></a>
+ layout property in the Mapbox Style Specification.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
+ */
+@property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *textFontSize;
+
+
+@property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *textSize __attribute__((unavailable("Use textFontSize instead.")));
 
 /**
  If true, other symbols can be visible even if they collide with the text.
@@ -630,12 +910,18 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  `NSNumber` object containing `NO`. Set this property to `nil` to reset it to
  the default value.
  
- This property is only applied to the style if `textField` is non-`nil`.
- Otherwise, it is ignored.
+ This property is only applied to the style if `text` is non-`nil`. Otherwise,
+ it is ignored.
  
  This attribute corresponds to the <a
  href="https://www.mapbox.com/mapbox-gl-style-spec/#layout-symbol-text-ignore-placement"><code>text-ignore-placement</code></a>
  layout property in the Mapbox Style Specification.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of
+ `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *textIgnoresPlacement;
 
@@ -649,12 +935,18 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  `NSValue` object containing `MGLTextJustificationCenter`. Set this property to
  `nil` to reset it to the default value.
  
- This property is only applied to the style if `textField` is non-`nil`.
- Otherwise, it is ignored.
+ This property is only applied to the style if `text` is non-`nil`. Otherwise,
+ it is ignored.
  
  This attribute corresponds to the <a
  href="https://www.mapbox.com/mapbox-gl-style-spec/#layout-symbol-text-justify"><code>text-justify</code></a>
  layout property in the Mapbox Style Specification.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of
+ `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *textJustification;
 
@@ -670,8 +962,15 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  `NSNumber` object containing the float `0`. Set this property to `nil` to reset
  it to the default value.
  
- This property is only applied to the style if `textField` is non-`nil`.
- Otherwise, it is ignored.
+ This property is only applied to the style if `text` is non-`nil`. Otherwise,
+ it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *textLetterSpacing;
 
@@ -684,25 +983,61 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  `NSNumber` object containing the float `1.2`. Set this property to `nil` to
  reset it to the default value.
  
- This property is only applied to the style if `textField` is non-`nil`.
- Otherwise, it is ignored.
+ This property is only applied to the style if `text` is non-`nil`. Otherwise,
+ it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *textLineHeight;
 
+#if TARGET_OS_IPHONE
 /**
  Offset distance of text from its anchor.
  
  This property is measured in ems.
  
  The default value of this property is an `MGLStyleValue` object containing an
- `NSValue` object containing a `CGVector` struct set to 0 ems from the left and
- 0 ems from the top. Set this property to `nil` to reset it to the default
- value.
+ `NSValue` object containing a `CGVector` struct set to 0 ems rightward and 0
+ ems downward. Set this property to `nil` to reset it to the default value.
  
- This property is only applied to the style if `textField` is non-`nil`.
- Otherwise, it is ignored.
+ This property is only applied to the style if `text` is non-`nil`. Otherwise,
+ it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *textOffset;
+#else
+/**
+ Offset distance of text from its anchor.
+ 
+ This property is measured in ems.
+ 
+ The default value of this property is an `MGLStyleValue` object containing an
+ `NSValue` object containing a `CGVector` struct set to 0 ems rightward and 0
+ ems upward. Set this property to `nil` to reset it to the default value.
+ 
+ This property is only applied to the style if `text` is non-`nil`. Otherwise,
+ it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
+ */
+@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *textOffset;
+#endif
 
 /**
  If true, icons will display without their corresponding text when the text
@@ -712,8 +1047,14 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  `NSNumber` object containing `NO`. Set this property to `nil` to reset it to
  the default value.
  
- This property is only applied to the style if `textField` is non-`nil`, and
+ This property is only applied to the style if `text` is non-`nil`, and
  `iconImageName` is non-`nil`. Otherwise, it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of
+ `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable, getter=isTextOptional) MGLStyleValue<NSNumber *> *textOptional;
 
@@ -727,8 +1068,15 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  `NSNumber` object containing the float `2`. Set this property to `nil` to reset
  it to the default value.
  
- This property is only applied to the style if `textField` is non-`nil`.
- Otherwise, it is ignored.
+ This property is only applied to the style if `text` is non-`nil`. Otherwise,
+ it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *textPadding;
 
@@ -739,8 +1087,14 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  `NSValue` object containing `MGLTextPitchAlignmentAuto`. Set this property to
  `nil` to reset it to the default value.
  
- This property is only applied to the style if `textField` is non-`nil`.
- Otherwise, it is ignored.
+ This property is only applied to the style if `text` is non-`nil`. Otherwise,
+ it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of
+ `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *textPitchAlignment;
 
@@ -753,12 +1107,19 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  `NSNumber` object containing the float `0`. Set this property to `nil` to reset
  it to the default value.
  
- This property is only applied to the style if `textField` is non-`nil`.
- Otherwise, it is ignored.
+ This property is only applied to the style if `text` is non-`nil`. Otherwise,
+ it is ignored.
  
  This attribute corresponds to the <a
  href="https://www.mapbox.com/mapbox-gl-style-spec/#layout-symbol-text-rotate"><code>text-rotate</code></a>
  layout property in the Mapbox Style Specification.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *textRotation;
 
@@ -773,24 +1134,16 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  `NSValue` object containing `MGLTextRotationAlignmentAuto`. Set this property
  to `nil` to reset it to the default value.
  
- This property is only applied to the style if `textField` is non-`nil`.
- Otherwise, it is ignored.
+ This property is only applied to the style if `text` is non-`nil`. Otherwise,
+ it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of
+ `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *textRotationAlignment;
-
-/**
- Font size.
- 
- This property is measured in points.
- 
- The default value of this property is an `MGLStyleValue` object containing an
- `NSNumber` object containing the float `16`. Set this property to `nil` to
- reset it to the default value.
- 
- This property is only applied to the style if `textField` is non-`nil`.
- Otherwise, it is ignored.
- */
-@property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *textSize;
 
 /**
  Specifies how to capitalize text.
@@ -799,8 +1152,14 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  `NSValue` object containing `MGLTextTransformNone`. Set this property to `nil`
  to reset it to the default value.
  
- This property is only applied to the style if `textField` is non-`nil`.
- Otherwise, it is ignored.
+ This property is only applied to the style if `text` is non-`nil`. Otherwise,
+ it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of
+ `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *textTransform;
 
@@ -817,8 +1176,15 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
-@property (nonatomic, null_resettable) MGLStyleValue<MGLColor *> *iconColor;
+@property (nonatomic, null_resettable) MGLStyleValue<UIColor *> *iconColor;
 #else
 /**
  The tint color to apply to the icon. The `iconImageName` property must be set
@@ -830,8 +1196,15 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
-@property (nonatomic, null_resettable) MGLStyleValue<MGLColor *> *iconColor;
+@property (nonatomic, null_resettable) MGLStyleValue<NSColor *> *iconColor;
 #endif
 
 /**
@@ -845,6 +1218,13 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *iconHaloBlur;
 
@@ -859,8 +1239,15 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
-@property (nonatomic, null_resettable) MGLStyleValue<MGLColor *> *iconHaloColor;
+@property (nonatomic, null_resettable) MGLStyleValue<UIColor *> *iconHaloColor;
 #else
 /**
  The color of the icon’s halo. The `iconImageName` property must be set to a
@@ -872,8 +1259,15 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
-@property (nonatomic, null_resettable) MGLStyleValue<MGLColor *> *iconHaloColor;
+@property (nonatomic, null_resettable) MGLStyleValue<NSColor *> *iconHaloColor;
 #endif
 
 /**
@@ -887,6 +1281,13 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *iconHaloWidth;
 
@@ -899,35 +1300,93 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *iconOpacity;
 
+#if TARGET_OS_IPHONE
 /**
  Distance that the icon's anchor is moved from its original placement.
  
  This property is measured in points.
  
  The default value of this property is an `MGLStyleValue` object containing an
- `NSValue` object containing a `CGVector` struct set to 0 points from the left
- and 0 points from the top. Set this property to `nil` to reset it to the
- default value.
+ `NSValue` object containing a `CGVector` struct set to 0 points rightward and 0
+ points downward. Set this property to `nil` to reset it to the default value.
  
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
+ 
+ This attribute corresponds to the <a
+ href="https://www.mapbox.com/mapbox-gl-style-spec/#paint-icon-translate"><code>icon-translate</code></a>
+ layout property in the Mapbox Style Specification.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
-@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *iconTranslate;
+@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *iconTranslation;
+#else
+/**
+ Distance that the icon's anchor is moved from its original placement.
+ 
+ This property is measured in points.
+ 
+ The default value of this property is an `MGLStyleValue` object containing an
+ `NSValue` object containing a `CGVector` struct set to 0 points rightward and 0
+ points upward. Set this property to `nil` to reset it to the default value.
+ 
+ This property is only applied to the style if `iconImageName` is non-`nil`.
+ Otherwise, it is ignored.
+ 
+ This attribute corresponds to the <a
+ href="https://www.mapbox.com/mapbox-gl-style-spec/#paint-icon-translate"><code>icon-translate</code></a>
+ layout property in the Mapbox Style Specification.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
+ */
+@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *iconTranslation;
+#endif
+
+@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *iconTranslate __attribute__((unavailable("Use iconTranslation instead.")));
 
 /**
  Controls the translation reference point.
  
  The default value of this property is an `MGLStyleValue` object containing an
- `NSValue` object containing `MGLIconTranslateAnchorMap`. Set this property to
+ `NSValue` object containing `MGLIconTranslationAnchorMap`. Set this property to
  `nil` to reset it to the default value.
  
  This property is only applied to the style if `iconImageName` is non-`nil`, and
- `iconTranslate` is non-`nil`. Otherwise, it is ignored.
+ `iconTranslation` is non-`nil`. Otherwise, it is ignored.
+ 
+ This attribute corresponds to the <a
+ href="https://www.mapbox.com/mapbox-gl-style-spec/#paint-icon-translate-anchor"><code>icon-translate-anchor</code></a>
+ layout property in the Mapbox Style Specification.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of
+ `MGLInterpolationModeInterval`
  */
-@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *iconTranslateAnchor;
+@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *iconTranslationAnchor;
+
+@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *iconTranslateAnchor __attribute__((unavailable("Use iconTranslationAnchor instead.")));
 
 #if TARGET_OS_IPHONE
 /**
@@ -937,10 +1396,17 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  `UIColor.blackColor`. Set this property to `nil` to reset it to the default
  value.
  
- This property is only applied to the style if `textField` is non-`nil`.
- Otherwise, it is ignored.
+ This property is only applied to the style if `text` is non-`nil`. Otherwise,
+ it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
-@property (nonatomic, null_resettable) MGLStyleValue<MGLColor *> *textColor;
+@property (nonatomic, null_resettable) MGLStyleValue<UIColor *> *textColor;
 #else
 /**
  The color with which the text will be drawn.
@@ -949,10 +1415,17 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  `NSColor.blackColor`. Set this property to `nil` to reset it to the default
  value.
  
- This property is only applied to the style if `textField` is non-`nil`.
- Otherwise, it is ignored.
+ This property is only applied to the style if `text` is non-`nil`. Otherwise,
+ it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
-@property (nonatomic, null_resettable) MGLStyleValue<MGLColor *> *textColor;
+@property (nonatomic, null_resettable) MGLStyleValue<NSColor *> *textColor;
 #endif
 
 /**
@@ -964,8 +1437,15 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  `NSNumber` object containing the float `0`. Set this property to `nil` to reset
  it to the default value.
  
- This property is only applied to the style if `textField` is non-`nil`.
- Otherwise, it is ignored.
+ This property is only applied to the style if `text` is non-`nil`. Otherwise,
+ it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *textHaloBlur;
 
@@ -977,10 +1457,17 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  `UIColor.clearColor`. Set this property to `nil` to reset it to the default
  value.
  
- This property is only applied to the style if `textField` is non-`nil`.
- Otherwise, it is ignored.
+ This property is only applied to the style if `text` is non-`nil`. Otherwise,
+ it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
-@property (nonatomic, null_resettable) MGLStyleValue<MGLColor *> *textHaloColor;
+@property (nonatomic, null_resettable) MGLStyleValue<UIColor *> *textHaloColor;
 #else
 /**
  The color of the text's halo, which helps it stand out from backgrounds.
@@ -989,10 +1476,17 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  `NSColor.clearColor`. Set this property to `nil` to reset it to the default
  value.
  
- This property is only applied to the style if `textField` is non-`nil`.
- Otherwise, it is ignored.
+ This property is only applied to the style if `text` is non-`nil`. Otherwise,
+ it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
-@property (nonatomic, null_resettable) MGLStyleValue<MGLColor *> *textHaloColor;
+@property (nonatomic, null_resettable) MGLStyleValue<NSColor *> *textHaloColor;
 #endif
 
 /**
@@ -1005,8 +1499,15 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  `NSNumber` object containing the float `0`. Set this property to `nil` to reset
  it to the default value.
  
- This property is only applied to the style if `textField` is non-`nil`.
- Otherwise, it is ignored.
+ This property is only applied to the style if `text` is non-`nil`. Otherwise,
+ it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *textHaloWidth;
 
@@ -1017,37 +1518,235 @@ typedef NS_ENUM(NSUInteger, MGLTextTranslateAnchor) {
  `NSNumber` object containing the float `1`. Set this property to `nil` to reset
  it to the default value.
  
- This property is only applied to the style if `textField` is non-`nil`.
- Otherwise, it is ignored.
+ This property is only applied to the style if `text` is non-`nil`. Otherwise,
+ it is ignored.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *textOpacity;
 
+#if TARGET_OS_IPHONE
 /**
  Distance that the text's anchor is moved from its original placement.
  
  This property is measured in points.
  
  The default value of this property is an `MGLStyleValue` object containing an
- `NSValue` object containing a `CGVector` struct set to 0 points from the left
- and 0 points from the top. Set this property to `nil` to reset it to the
- default value.
+ `NSValue` object containing a `CGVector` struct set to 0 points rightward and 0
+ points downward. Set this property to `nil` to reset it to the default value.
  
- This property is only applied to the style if `textField` is non-`nil`.
- Otherwise, it is ignored.
+ This property is only applied to the style if `text` is non-`nil`. Otherwise,
+ it is ignored.
+ 
+ This attribute corresponds to the <a
+ href="https://www.mapbox.com/mapbox-gl-style-spec/#paint-text-translate"><code>text-translate</code></a>
+ layout property in the Mapbox Style Specification.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
-@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *textTranslate;
+@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *textTranslation;
+#else
+/**
+ Distance that the text's anchor is moved from its original placement.
+ 
+ This property is measured in points.
+ 
+ The default value of this property is an `MGLStyleValue` object containing an
+ `NSValue` object containing a `CGVector` struct set to 0 points rightward and 0
+ points upward. Set this property to `nil` to reset it to the default value.
+ 
+ This property is only applied to the style if `text` is non-`nil`. Otherwise,
+ it is ignored.
+ 
+ This attribute corresponds to the <a
+ href="https://www.mapbox.com/mapbox-gl-style-spec/#paint-text-translate"><code>text-translate</code></a>
+ layout property in the Mapbox Style Specification.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
+ */
+@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *textTranslation;
+#endif
+
+@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *textTranslate __attribute__((unavailable("Use textTranslation instead.")));
 
 /**
  Controls the translation reference point.
  
  The default value of this property is an `MGLStyleValue` object containing an
- `NSValue` object containing `MGLTextTranslateAnchorMap`. Set this property to
+ `NSValue` object containing `MGLTextTranslationAnchorMap`. Set this property to
  `nil` to reset it to the default value.
  
- This property is only applied to the style if `textField` is non-`nil`, and
- `textTranslate` is non-`nil`. Otherwise, it is ignored.
+ This property is only applied to the style if `text` is non-`nil`, and
+ `textTranslation` is non-`nil`. Otherwise, it is ignored.
+ 
+ This attribute corresponds to the <a
+ href="https://www.mapbox.com/mapbox-gl-style-spec/#paint-text-translate-anchor"><code>text-translate-anchor</code></a>
+ layout property in the Mapbox Style Specification.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of
+ `MGLInterpolationModeInterval`
  */
-@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *textTranslateAnchor;
+@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *textTranslationAnchor;
+
+@property (nonatomic, null_resettable) MGLStyleValue<NSValue *> *textTranslateAnchor __attribute__((unavailable("Use textTranslationAnchor instead.")));
+
+@end
+
+/**
+ Methods for wrapping an enumeration value for a style layer attribute in an
+ `MGLSymbolStyleLayer` object and unwrapping its raw value.
+ */
+@interface NSValue (MGLSymbolStyleLayerAdditions)
+
+#pragma mark Working with Symbol Style Layer Attribute Values
+
+/**
+ Creates a new value object containing the given `MGLIconRotationAlignment` enumeration.
+
+ @param iconRotationAlignment The value for the new object.
+ @return A new value object that contains the enumeration value.
+ */
++ (instancetype)valueWithMGLIconRotationAlignment:(MGLIconRotationAlignment)iconRotationAlignment;
+
+/**
+ The `MGLIconRotationAlignment` enumeration representation of the value.
+ */
+@property (readonly) MGLIconRotationAlignment MGLIconRotationAlignmentValue;
+
+/**
+ Creates a new value object containing the given `MGLIconTextFit` enumeration.
+
+ @param iconTextFit The value for the new object.
+ @return A new value object that contains the enumeration value.
+ */
++ (instancetype)valueWithMGLIconTextFit:(MGLIconTextFit)iconTextFit;
+
+/**
+ The `MGLIconTextFit` enumeration representation of the value.
+ */
+@property (readonly) MGLIconTextFit MGLIconTextFitValue;
+
+/**
+ Creates a new value object containing the given `MGLSymbolPlacement` enumeration.
+
+ @param symbolPlacement The value for the new object.
+ @return A new value object that contains the enumeration value.
+ */
++ (instancetype)valueWithMGLSymbolPlacement:(MGLSymbolPlacement)symbolPlacement;
+
+/**
+ The `MGLSymbolPlacement` enumeration representation of the value.
+ */
+@property (readonly) MGLSymbolPlacement MGLSymbolPlacementValue;
+
+/**
+ Creates a new value object containing the given `MGLTextAnchor` enumeration.
+
+ @param textAnchor The value for the new object.
+ @return A new value object that contains the enumeration value.
+ */
++ (instancetype)valueWithMGLTextAnchor:(MGLTextAnchor)textAnchor;
+
+/**
+ The `MGLTextAnchor` enumeration representation of the value.
+ */
+@property (readonly) MGLTextAnchor MGLTextAnchorValue;
+
+/**
+ Creates a new value object containing the given `MGLTextJustification` enumeration.
+
+ @param textJustification The value for the new object.
+ @return A new value object that contains the enumeration value.
+ */
++ (instancetype)valueWithMGLTextJustification:(MGLTextJustification)textJustification;
+
+/**
+ The `MGLTextJustification` enumeration representation of the value.
+ */
+@property (readonly) MGLTextJustification MGLTextJustificationValue;
+
+/**
+ Creates a new value object containing the given `MGLTextPitchAlignment` enumeration.
+
+ @param textPitchAlignment The value for the new object.
+ @return A new value object that contains the enumeration value.
+ */
++ (instancetype)valueWithMGLTextPitchAlignment:(MGLTextPitchAlignment)textPitchAlignment;
+
+/**
+ The `MGLTextPitchAlignment` enumeration representation of the value.
+ */
+@property (readonly) MGLTextPitchAlignment MGLTextPitchAlignmentValue;
+
+/**
+ Creates a new value object containing the given `MGLTextRotationAlignment` enumeration.
+
+ @param textRotationAlignment The value for the new object.
+ @return A new value object that contains the enumeration value.
+ */
++ (instancetype)valueWithMGLTextRotationAlignment:(MGLTextRotationAlignment)textRotationAlignment;
+
+/**
+ The `MGLTextRotationAlignment` enumeration representation of the value.
+ */
+@property (readonly) MGLTextRotationAlignment MGLTextRotationAlignmentValue;
+
+/**
+ Creates a new value object containing the given `MGLTextTransform` enumeration.
+
+ @param textTransform The value for the new object.
+ @return A new value object that contains the enumeration value.
+ */
++ (instancetype)valueWithMGLTextTransform:(MGLTextTransform)textTransform;
+
+/**
+ The `MGLTextTransform` enumeration representation of the value.
+ */
+@property (readonly) MGLTextTransform MGLTextTransformValue;
+
+/**
+ Creates a new value object containing the given `MGLIconTranslationAnchor` enumeration.
+
+ @param iconTranslationAnchor The value for the new object.
+ @return A new value object that contains the enumeration value.
+ */
++ (instancetype)valueWithMGLIconTranslationAnchor:(MGLIconTranslationAnchor)iconTranslationAnchor;
+
+/**
+ The `MGLIconTranslationAnchor` enumeration representation of the value.
+ */
+@property (readonly) MGLIconTranslationAnchor MGLIconTranslationAnchorValue;
+
+/**
+ Creates a new value object containing the given `MGLTextTranslationAnchor` enumeration.
+
+ @param textTranslationAnchor The value for the new object.
+ @return A new value object that contains the enumeration value.
+ */
++ (instancetype)valueWithMGLTextTranslationAnchor:(MGLTextTranslationAnchor)textTranslationAnchor;
+
+/**
+ The `MGLTextTranslationAnchor` enumeration representation of the value.
+ */
+@property (readonly) MGLTextTranslationAnchor MGLTextTranslationAnchorValue;
 
 @end
 

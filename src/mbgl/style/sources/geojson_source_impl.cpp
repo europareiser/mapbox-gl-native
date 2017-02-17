@@ -1,4 +1,4 @@
-#include <mbgl/platform/log.hpp>
+#include <mbgl/util/logging.hpp>
 #include <mbgl/storage/file_source.hpp>
 #include <mbgl/style/conversion/geojson.hpp>
 #include <mbgl/style/source_observer.hpp>
@@ -39,7 +39,7 @@ GeoJSONSource::Impl::~Impl() = default;
 void GeoJSONSource::Impl::setURL(std::string url_) {
     url = std::move(url_);
 
-    //Signal that the source description needs a reload
+    // Signal that the source description needs a reload
     if (loaded || req) {
         loaded = false;
         req.reset();
@@ -57,21 +57,15 @@ void GeoJSONSource::Impl::setGeoJSON(const GeoJSON& geoJSON) {
     _setGeoJSON(geoJSON);
 }
 
-//Private implementation
+// Private implementation
 void GeoJSONSource::Impl::_setGeoJSON(const GeoJSON& geoJSON) {
     double scale = util::EXTENT / util::tileSize;
 
     cache.clear();
 
-    if (!options.cluster) {
-        mapbox::geojsonvt::Options vtOptions;
-        vtOptions.maxZoom = options.maxzoom;
-        vtOptions.extent = util::EXTENT;
-        vtOptions.buffer = std::round(scale * options.buffer);
-        vtOptions.tolerance = scale * options.tolerance;
-        geoJSONOrSupercluster = std::make_unique<mapbox::geojsonvt::GeoJSONVT>(geoJSON, vtOptions);
-
-    } else {
+    if (options.cluster
+        && geoJSON.is<mapbox::geometry::feature_collection<double>>()
+        && !geoJSON.get<mapbox::geometry::feature_collection<double>>().empty()) {
         mapbox::supercluster::Options clusterOptions;
         clusterOptions.maxZoom = options.clusterMaxZoom;
         clusterOptions.extent = util::EXTENT;
@@ -80,6 +74,13 @@ void GeoJSONSource::Impl::_setGeoJSON(const GeoJSON& geoJSON) {
         const auto& features = geoJSON.get<mapbox::geometry::feature_collection<double>>();
         geoJSONOrSupercluster =
             std::make_unique<mapbox::supercluster::Supercluster>(features, clusterOptions);
+    } else {
+        mapbox::geojsonvt::Options vtOptions;
+        vtOptions.maxZoom = options.maxzoom;
+        vtOptions.extent = util::EXTENT;
+        vtOptions.buffer = std::round(scale * options.buffer);
+        vtOptions.tolerance = scale * options.tolerance;
+        geoJSONOrSupercluster = std::make_unique<mapbox::geojsonvt::GeoJSONVT>(geoJSON, vtOptions);
     }
 
     for (auto const &item : tiles) {

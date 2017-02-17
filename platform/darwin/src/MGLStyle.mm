@@ -24,6 +24,7 @@
 
 #import "MGLAttributionInfo_Private.h"
 
+#include <mbgl/map/map.hpp>
 #include <mbgl/util/default_styles.hpp>
 #include <mbgl/sprite/sprite_image.hpp>
 #include <mbgl/style/layers/fill_layer.hpp>
@@ -36,7 +37,6 @@
 #include <mbgl/style/sources/geojson_source.hpp>
 #include <mbgl/style/sources/vector_source.hpp>
 #include <mbgl/style/sources/raster_source.hpp>
-#include <mbgl/mbgl.hpp>
 
 #if TARGET_OS_IPHONE
     #import "UIImage+MGLAdditions.h"
@@ -71,7 +71,11 @@ static_assert(mbgl::util::default_styles::currentVersion == MGLStyleDefaultVersi
     } \
     \
     + (NSURL *)name##StyleURL##WithVersion:(NSInteger)version { \
-        return [NSURL URLWithString:[@"mapbox://styles/mapbox/" #fileName "-v" stringByAppendingFormat:@"%li", (long)version]]; \
+        if (mbgl::util::default_styles::currentVersion == version) { \
+            return [NSURL URLWithString:@(mbgl::util::default_styles::name.url)]; \
+        } else { \
+            return [NSURL URLWithString:[@"mapbox://styles/mapbox/" #fileName "-v" stringByAppendingFormat:@"%li", (long)version]]; \
+        } \
     }
 
 MGL_DEFINE_STYLE(streets, streets)
@@ -127,9 +131,9 @@ static NSURL *MGLStyleURL_emerald;
 
 #pragma mark Sources
 
-- (NS_MUTABLE_SET_OF(MGLSource *) *)sources {
+- (NS_SET_OF(__kindof MGLSource *) *)sources {
     auto rawSources = self.mapView.mbglMap->getSources();
-    NSMutableSet *sources = [NSMutableSet setWithCapacity:rawSources.size()];
+    NS_MUTABLE_SET_OF(__kindof MGLSource *) *sources = [NSMutableSet setWithCapacity:rawSources.size()];
     for (auto rawSource = rawSources.begin(); rawSource != rawSources.end(); ++rawSource) {
         MGLSource *source = [self sourceFromMBGLSource:*rawSource];
         [sources addObject:source];
@@ -137,7 +141,7 @@ static NSURL *MGLStyleURL_emerald;
     return sources;
 }
 
-- (void)setSources:(NS_MUTABLE_SET_OF(MGLSource *) *)sources {
+- (void)setSources:(NS_SET_OF(__kindof MGLSource *) *)sources {
     for (MGLSource *source in self.sources) {
         [self removeSource:source];
     }
@@ -213,7 +217,7 @@ static NSURL *MGLStyleURL_emerald;
         if (![source isKindOfClass:[MGLTileSource class]]) {
             continue;
         }
-        
+
         NSArray *tileSetInfos = [source attributionInfosWithFontSize:fontSize linkColor:linkColor];
         [infos growArrayByAddingAttributionInfosFromArray:tileSetInfos];
     }
@@ -222,10 +226,10 @@ static NSURL *MGLStyleURL_emerald;
 
 #pragma mark Style layers
 
-- (NS_MUTABLE_ARRAY_OF(MGLStyleLayer *) *)layers
+- (NS_ARRAY_OF(__kindof MGLStyleLayer *) *)layers
 {
     auto layers = self.mapView.mbglMap->getLayers();
-    NSMutableArray *styleLayers = [NSMutableArray arrayWithCapacity:layers.size()];
+    NS_MUTABLE_ARRAY_OF(__kindof MGLStyleLayer *) *styleLayers = [NSMutableArray arrayWithCapacity:layers.size()];
     for (auto layer : layers) {
         MGLStyleLayer *styleLayer = [self layerFromMBGLLayer:layer];
         [styleLayers addObject:styleLayer];
@@ -233,7 +237,7 @@ static NSURL *MGLStyleURL_emerald;
     return styleLayers;
 }
 
-- (void)setLayers:(NS_MUTABLE_ARRAY_OF(MGLStyleLayer *) *)layers {
+- (void)setLayers:(NS_ARRAY_OF(__kindof MGLStyleLayer *) *)layers {
     for (MGLStyleLayer *layer in self.layers) {
         [self removeLayer:layer];
     }
@@ -317,7 +321,7 @@ static NSURL *MGLStyleURL_emerald;
 - (MGLStyleLayer *)layerFromMBGLLayer:(mbgl::style::Layer *)mbglLayer
 {
     NSParameterAssert(mbglLayer);
-    
+
     NSString *identifier = @(mbglLayer->getID().c_str());
     MGLStyleLayer *styleLayer;
     if (auto fillLayer = mbglLayer->as<mbgl::style::FillLayer>()) {
@@ -434,7 +438,7 @@ static NSURL *MGLStyleURL_emerald;
          @"Make sure sibling was obtained using -[MGLStyle layerWithIdentifier:].",
          sibling];
     }
-    
+
     auto layers = self.mapView.mbglMap->getLayers();
     std::string siblingIdentifier = sibling.identifier.UTF8String;
     NSUInteger index = 0;
@@ -444,7 +448,7 @@ static NSURL *MGLStyleURL_emerald;
         }
         index++;
     }
-    
+
     [self willChangeValueForKey:@"layers"];
     if (index + 1 > layers.size()) {
         [NSException raise:NSInvalidArgumentException
@@ -498,7 +502,7 @@ static NSURL *MGLStyleURL_emerald;
         newAppliedClasses.push_back([appliedClass UTF8String]);
     }
 
-    mbgl::style::TransitionOptions transition { { MGLDurationInSeconds(transitionDuration) } };
+    mbgl::style::TransitionOptions transition { { MGLDurationInSecondsFromTimeInterval(transitionDuration) } };
     self.mapView.mbglMap->setTransitionOptions(transition);
     self.mapView.mbglMap->setClasses(newAppliedClasses);
 }
@@ -564,6 +568,34 @@ static NSURL *MGLStyleURL_emerald;
 
     auto spriteImage = self.mapView.mbglMap->getImage([name UTF8String]);
     return spriteImage ? [[MGLImage alloc] initWithMGLSpriteImage:spriteImage] : nil;
+}
+
+#pragma mark Style transitions
+
+- (void)setTransitionDuration:(NSTimeInterval)duration
+{
+    auto transitionOptions = self.mapView.mbglMap->getTransitionOptions();
+    transitionOptions.duration = MGLDurationInSecondsFromTimeInterval(duration);
+    self.mapView.mbglMap->setTransitionOptions(transitionOptions);
+}
+
+- (NSTimeInterval)transitionDuration
+{
+    const mbgl::style::TransitionOptions transitionOptions = self.mapView.mbglMap->getTransitionOptions();
+    return MGLTimeIntervalFromDurationInSeconds(transitionOptions.duration.value_or(mbgl::Duration::zero()));
+}
+
+- (void)setTransitionDelay:(NSTimeInterval)delay
+{
+    auto transitionOptions = self.mapView.mbglMap->getTransitionOptions();
+    transitionOptions.delay = MGLDurationInSecondsFromTimeInterval(delay);
+    self.mapView.mbglMap->setTransitionOptions(transitionOptions);
+}
+
+- (NSTimeInterval)transitionDelay
+{
+    const mbgl::style::TransitionOptions transitionOptions = self.mapView.mbglMap->getTransitionOptions();
+    return MGLTimeIntervalFromDurationInSeconds(transitionOptions.delay.value_or(mbgl::Duration::zero()));
 }
 
 - (NSString *)description

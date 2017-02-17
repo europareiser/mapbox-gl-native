@@ -1,6 +1,7 @@
-// This file is generated. 
+// This file is generated.
 // Edit platform/darwin/scripts/generate-style-code.js, then run `make style-code-darwin`.
 
+#import "MGLFoundation.h"
 #import "MGLStyleValue.h"
 #import "MGLForegroundStyleLayer.h"
 
@@ -17,15 +18,22 @@ NS_ASSUME_NONNULL_BEGIN
  set</a> uploaded to Mapbox Studio, or a raster map authored in <a
  href="https://tilemill-project.github.io/tilemill/">TileMill</a>, the classic
  Mapbox Editor, or Mapbox Studio Classic.
- 
+
  You can access an existing raster style layer using the
  `-[MGLStyle layerWithIdentifier:]` method if you know its identifier;
  otherwise, find it using the `MGLStyle.layers` property. You can also create a
  new raster style layer and add it to the style using a method such as
  `-[MGLStyle addLayer:]`.
 
- <!--EXAMPLE: MGLRasterStyleLayer-->
+ ### Example
+
+ ```swift
+ let layer = MGLRasterStyleLayer(identifier: "clouds", source: source)
+ layer.rasterOpacity = MGLStyleValue(rawValue: 0.5)
+ mapView.style?.addLayer(layer)
+ ```
  */
+MGL_EXPORT
 @interface MGLRasterStyleLayer : MGLForegroundStyleLayer
 
 #pragma mark - Accessing the Paint Attributes
@@ -39,8 +47,15 @@ NS_ASSUME_NONNULL_BEGIN
  it to the default value.
  
  This attribute corresponds to the <a
- href="https://www.mapbox.com/mapbox-gl-style-spec/#layout-raster-raster-brightness-max"><code>raster-brightness-max</code></a>
+ href="https://www.mapbox.com/mapbox-gl-style-spec/#paint-raster-brightness-max"><code>raster-brightness-max</code></a>
  layout property in the Mapbox Style Specification.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *maximumRasterBrightness;
 
@@ -55,8 +70,15 @@ NS_ASSUME_NONNULL_BEGIN
  it to the default value.
  
  This attribute corresponds to the <a
- href="https://www.mapbox.com/mapbox-gl-style-spec/#layout-raster-raster-brightness-min"><code>raster-brightness-min</code></a>
+ href="https://www.mapbox.com/mapbox-gl-style-spec/#paint-raster-brightness-min"><code>raster-brightness-min</code></a>
  layout property in the Mapbox Style Specification.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *minimumRasterBrightness;
 
@@ -68,6 +90,13 @@ NS_ASSUME_NONNULL_BEGIN
  The default value of this property is an `MGLStyleValue` object containing an
  `NSNumber` object containing the float `0`. Set this property to `nil` to reset
  it to the default value.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *rasterContrast;
 
@@ -79,6 +108,13 @@ NS_ASSUME_NONNULL_BEGIN
  The default value of this property is an `MGLStyleValue` object containing an
  `NSNumber` object containing the float `300`. Set this property to `nil` to
  reset it to the default value.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *rasterFadeDuration;
 
@@ -92,8 +128,15 @@ NS_ASSUME_NONNULL_BEGIN
  it to the default value.
  
  This attribute corresponds to the <a
- href="https://www.mapbox.com/mapbox-gl-style-spec/#layout-raster-raster-hue-rotate"><code>raster-hue-rotate</code></a>
+ href="https://www.mapbox.com/mapbox-gl-style-spec/#paint-raster-hue-rotate"><code>raster-hue-rotate</code></a>
  layout property in the Mapbox Style Specification.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *rasterHueRotation;
 
@@ -105,6 +148,13 @@ NS_ASSUME_NONNULL_BEGIN
  The default value of this property is an `MGLStyleValue` object containing an
  `NSNumber` object containing the float `1`. Set this property to `nil` to reset
  it to the default value.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *rasterOpacity;
 
@@ -114,6 +164,13 @@ NS_ASSUME_NONNULL_BEGIN
  The default value of this property is an `MGLStyleValue` object containing an
  `NSNumber` object containing the float `0`. Set this property to `nil` to reset
  it to the default value.
+ 
+ You can set this property to an instance of:
+ 
+ * `MGLStyleConstantValue`
+ * `MGLCameraStyleFunction` with an interpolation mode of:
+   * `MGLInterpolationModeExponential`
+   * `MGLInterpolationModeInterval`
  */
 @property (nonatomic, null_resettable) MGLStyleValue<NSNumber *> *rasterSaturation;
 

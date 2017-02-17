@@ -7,7 +7,7 @@
 
 #import "NSURL+MGLAdditions.h"
 
-#include <mbgl/mbgl.hpp>
+#include <mbgl/map/map.hpp>
 #include <mbgl/style/sources/geojson_source.hpp>
 
 const MGLShapeSourceOption MGLShapeSourceOptionClustered = @"MGLShapeSourceOptionClustered";
@@ -34,10 +34,10 @@ const MGLShapeSourceOption MGLShapeSourceOptionSimplificationTolerance = @"MGLSh
     if (self = [super initWithIdentifier:identifier]) {
         auto geoJSONOptions = MGLGeoJSONOptionsFromDictionary(options);
         auto source = std::make_unique<mbgl::style::GeoJSONSource>(identifier.UTF8String, geoJSONOptions);
-        
+
         _pendingSource = std::move(source);
         self.rawSource = _pendingSource.get();
-        
+
         self.URL = url;
     }
     return self;
@@ -47,13 +47,28 @@ const MGLShapeSourceOption MGLShapeSourceOptionSimplificationTolerance = @"MGLSh
     if (self = [super initWithIdentifier:identifier]) {
         auto geoJSONOptions = MGLGeoJSONOptionsFromDictionary(options);
         auto source = std::make_unique<mbgl::style::GeoJSONSource>(identifier.UTF8String, geoJSONOptions);
-        
+
         _pendingSource = std::move(source);
         self.rawSource = _pendingSource.get();
-        
+
         self.shape = shape;
     }
     return self;
+}
+
+- (instancetype)initWithIdentifier:(NSString *)identifier features:(NS_ARRAY_OF(MGLShape<MGLFeature> *) *)features options:(nullable NS_DICTIONARY_OF(MGLShapeSourceOption, id) *)options {
+    for (id <MGLFeature> feature in features) {
+        if (![feature conformsToProtocol:@protocol(MGLFeature)]) {
+            [NSException raise:NSInvalidArgumentException format:@"The object %@ included in the features argument does not conform to the MGLFeature protocol.", feature];
+        }
+    }
+    MGLShapeCollectionFeature *shapeCollectionFeature = [MGLShapeCollectionFeature shapeCollectionWithShapes:features];
+    return [self initWithIdentifier:identifier shape:shapeCollectionFeature options:options];
+}
+
+- (instancetype)initWithIdentifier:(NSString *)identifier shapes:(NS_ARRAY_OF(MGLShape *) *)shapes options:(nullable NS_DICTIONARY_OF(MGLShapeSourceOption, id) *)options {
+    MGLShapeCollection *shapeCollection = [MGLShapeCollection shapeCollectionWithShapes:shapes];
+    return [self initWithIdentifier:identifier shape:shapeCollection options:options];
 }
 
 - (instancetype)initWithRawSource:(mbgl::style::GeoJSONSource *)rawSource {
@@ -113,7 +128,7 @@ const MGLShapeSourceOption MGLShapeSourceOptionSimplificationTolerance = @"MGLSh
 
 mbgl::style::GeoJSONOptions MGLGeoJSONOptionsFromDictionary(NS_DICTIONARY_OF(MGLShapeSourceOption, id) *options) {
     auto geoJSONOptions = mbgl::style::GeoJSONOptions();
-    
+
     if (NSNumber *value = options[MGLShapeSourceOptionMaximumZoomLevel]) {
         if (![value isKindOfClass:[NSNumber class]]) {
             [NSException raise:NSInvalidArgumentException
@@ -121,7 +136,7 @@ mbgl::style::GeoJSONOptions MGLGeoJSONOptionsFromDictionary(NS_DICTIONARY_OF(MGL
         }
         geoJSONOptions.maxzoom = value.integerValue;
     }
-    
+
     if (NSNumber *value = options[MGLShapeSourceOptionBuffer]) {
         if (![value isKindOfClass:[NSNumber class]]) {
             [NSException raise:NSInvalidArgumentException
@@ -129,7 +144,7 @@ mbgl::style::GeoJSONOptions MGLGeoJSONOptionsFromDictionary(NS_DICTIONARY_OF(MGL
         }
         geoJSONOptions.buffer = value.integerValue;
     }
-    
+
     if (NSNumber *value = options[MGLShapeSourceOptionSimplificationTolerance]) {
         if (![value isKindOfClass:[NSNumber class]]) {
             [NSException raise:NSInvalidArgumentException
@@ -137,7 +152,7 @@ mbgl::style::GeoJSONOptions MGLGeoJSONOptionsFromDictionary(NS_DICTIONARY_OF(MGL
         }
         geoJSONOptions.tolerance = value.doubleValue;
     }
-    
+
     if (NSNumber *value = options[MGLShapeSourceOptionClusterRadius]) {
         if (![value isKindOfClass:[NSNumber class]]) {
             [NSException raise:NSInvalidArgumentException
@@ -145,7 +160,7 @@ mbgl::style::GeoJSONOptions MGLGeoJSONOptionsFromDictionary(NS_DICTIONARY_OF(MGL
         }
         geoJSONOptions.clusterRadius = value.integerValue;
     }
-    
+
     if (NSNumber *value = options[MGLShapeSourceOptionMaximumZoomLevelForClustering]) {
         if (![value isKindOfClass:[NSNumber class]]) {
             [NSException raise:NSInvalidArgumentException
@@ -153,7 +168,7 @@ mbgl::style::GeoJSONOptions MGLGeoJSONOptionsFromDictionary(NS_DICTIONARY_OF(MGL
         }
         geoJSONOptions.clusterMaxZoom = value.integerValue;
     }
-    
+
     if (NSNumber *value = options[MGLShapeSourceOptionClustered]) {
         if (![value isKindOfClass:[NSNumber class]]) {
             [NSException raise:NSInvalidArgumentException
@@ -161,6 +176,6 @@ mbgl::style::GeoJSONOptions MGLGeoJSONOptionsFromDictionary(NS_DICTIONARY_OF(MGL
         }
         geoJSONOptions.cluster = value.boolValue;
     }
-    
+
     return geoJSONOptions;
 }
